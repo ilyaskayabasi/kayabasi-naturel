@@ -1,0 +1,99 @@
+[
+  {
+    "id": "ev-yapimi-burger",
+    "title": "Ev Yapımı Burger",
+    "category": "aksam-yemegi",
+    "excerpt": "Lezzetli ve kolay hazırlanabilen ev yapımı burger.",
+    "image": "img/bg-img/r2.jpg",
+    "url": "recipes/ev-yapimi-burger.html",
+    "prep": "20 dk",
+    "cook": "15 dk",
+    "servings": "4",
+    "ingredients": [
+      "500g kıyma",
+      "1 adet soğan (rendelenmiş)",
+      "1 yumurta",
+      "Tuz, karabiber, kırmızı pul biber",
+      "4 adet hamburger ekmeği",
+      "Marul, domates, turşu"
+    ],
+    "steps": [
+      "Kıymayı soğan ve baharatlarla yoğurup köfte şekli verin.",
+      "Tavada veya ızgarada köfteleri pişirin.",
+      "Ekmeklere malzemeleri yerleştirip köfteyi ekleyin ve servis yapın."
+    ],
+    "tags": ["burger","kolay"]
+  },
+  {
+    "id": "vejetaryen-peynirli-salata",
+    "title": "Vejetaryen Peynirli Salata",
+    "category": "ogle-yemegi",
+    "excerpt": "Taze sebzeler ve peynirle hazırlanan hafif salata.",
+    "image": "img/bg-img/r1.jpg",
+    "url": "recipes/vejetaryen-peynirli-salata.html",
+    "prep": "10 dk",
+    "cook": "0 dk",
+    "servings": "2",
+    "ingredients": [
+      "Marul",
+      "Cherry domates",
+      "Salatalık",
+      "Beyaz peynir",
+      "Zeytinyağı, limon, tuz"
+    ],
+    "steps": [
+      "Sebzeleri yıkayıp doğrayın.",
+      "Peynir ve sos ile karıştırıp servis edin."
+    ],
+    "tags": ["salata","hafif"]
+  },
+  {
+    "id": "vegan-smoothie",
+    "title": "Vegan Smoothie",
+    "category": "kahvalti",
+    "excerpt": "Enerji veren, süt içermeyen meyve smoothie'si.",
+    "image": "img/bg-img/r3.jpg",
+    "url": "recipes/vegan-smoothie.html",
+    "prep": "5 dk",
+    "cook": "0 dk",
+    "servings": "1",
+    "ingredients": [
+      "1 muz",
+      "1 avuç ıspanak",
+      "1 su bardağı badem sütü",
+      "1 yemek kaşığı fıstık ezmesi (opsiyonel)"
+    ],
+    "steps": [
+      "Tüm malzemeleri blendera koyup pürüzsüz olana kadar çekin.",
+      "Soğuk servis edin."
+    ],
+    "tags": ["smoothie","kahvaltı"]
+  }
+  ,
+  {
+    "id": "cikolata-kek",
+    "title": "Çikolatalı Kek",
+    "category": "tatli",
+    "excerpt": "İçinden eriyen çikolata parçacıklı nemli kek.",
+    "image": "img/bg-img/r5.jpg",
+    "url": "recipes/cikolata-kek.html",
+    "prep": "15 dk",
+    "cook": "30 dk",
+    "servings": "8",
+    "ingredients": [
+      "200g un",
+      "200g şeker",
+      "3 yumurta",
+      "100g bitter çikolata",
+      "100g tereyağı",
+      "1 paket kabartma tozu"
+    ],
+    "steps": [
+      "Fırını 180°C'ye ısıtın.",
+      "Çikolatayı benmari usulü eritip tereyağı ile karıştırın.",
+      "Yumurta ve şekeri çırpın, kuru malzemeleri ekleyip karıştırın.",
+      "Hamuru kalıba döküp 30 dakika pişirin."
+    ],
+    "tags": ["kek","tatlı"]
+  }
+]

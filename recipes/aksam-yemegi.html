@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Akşam Yemeği Tarifleri — Delicious</title>
+    <link rel="icon" href="/img/core-img/favicon.ico">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/index.html">Ana Sayfa</a> › Akşam Yemeği
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1>Akşam Yemeği Tarifleri</h1>
+        <div id="recipes-list" class="row"></div>
+    </main>
+
+    <script src="/js/recipes.js"></script>
+    <script>
+    (function(){
+      function fetchRecipes(){
+        return fetch('/api/recipes').then(function(r){ if(!r.ok) throw new Error('api'); return r.json(); }).catch(function(){ return fetch('/data/recipes.json').then(function(r){ if(!r.ok) throw new Error('json'); return r.json(); }); });
+      }
+      fetchRecipes().then(function(list){
+        var filtered = list.filter(function(r){ return (r.category === 'aksam-yemegi') || (r.tags && r.tags.indexOf('aksam-yemegi')!==-1); });
+        if(window.renderRecipes) window.renderRecipes(filtered, '#recipes-list');
+      }).catch(function(e){ console.error(e); });
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ev Yapımı Burger — Delicious</title>
+    <link rel="icon" href="/img/core-img/favicon.ico">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/index.html">Ana Sayfa</a> › <a href="/receipe-post.html">Tarif</a> › Ev Yapımı Burger
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1>Ev Yapımı Burger</h1>
+        <p><strong>Hazırlık:</strong> 20 dk • <strong>Pişirme:</strong> 15 dk • <strong>Kaç Kişilik:</strong> 4</p>
+        <img src="/img/bg-img/r2.jpg" alt="Ev Yapımı Burger" style="max-width:100%;height:auto">
+
+        <section>
+            <h2>Malzemeler</h2>
+            <ul>
+                <li>500g kıyma</li>
+                <li>1 adet soğan (rendelenmiş)</li>
+                <li>1 yumurta</li>
+                <li>Tuz, karabiber, kırmızı pul biber</li>
+                <li>4 adet hamburger ekmeği</li>
+                <li>Marul, domates, turşu</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Hazırlık</h2>
+            <ol>
+                <li>Kıymayı soğan ve baharatlarla yoğurup köfte şekli verin.</li>
+                <li>Tavada veya ızgarada köfteleri pişirin.</li>
+                <li>Ekmeklere malzemeleri yerleştirip köfteyi ekleyin ve servis yapın.</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>Puanlama</h2>
+            <div class="rating" data-recipe-id="ev-yapimi-burger"></div>
+        </section>
+
+        <p><a href="/index.html">‹ Geri dön</a></p>
+    </main>
+
+    <script src="/js/recipes.js"></script>
+        <script>
+        (function(){
+            var id = 'ev-yapimi-burger';
+            function render(data){
+                try{
+                    document.querySelector('main h1').textContent = data.title || '';
+                    var meta = document.querySelector('main p');
+                    if(meta) meta.innerHTML = (data.prep?'<strong>Hazırlık:</strong> '+data.prep+' • ':'') + (data.cook?'<strong>Pişirme:</strong> '+data.cook+' • ':'') + (data.servings?'<strong>Kaç Kişilik:</strong> '+data.servings:'');
+                    var img = document.querySelector('main img');
+                    if(img && data.image) img.src = data.image;
+                    var ing = document.querySelector('section h2 + ul');
+                    if(ing && data.ingredients){ ing.innerHTML = ''; for(var i=0;i<data.ingredients.length;i++){ var li = document.createElement('li'); li.textContent = data.ingredients[i]; ing.appendChild(li); } }
+                    var steps = document.querySelector('section + section ol');
+                    if(steps && data.steps){ steps.innerHTML = ''; for(var i=0;i<data.steps.length;i++){ var li = document.createElement('li'); li.textContent = data.steps[i]; steps.appendChild(li); } }
+                }catch(e){ console.error(e); }
+            }
+            fetch('/api/recipes/'+id).then(function(res){ if(!res.ok) throw new Error('no api'); return res.json(); }).then(render).catch(function(){ });
+        })();
+        </script>
+</body>
+</html>

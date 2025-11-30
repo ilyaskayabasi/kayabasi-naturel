@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vejetaryen Peynirli Salata — Delicious</title>
+    <link rel="icon" href="/img/core-img/favicon.ico">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/index.html">Ana Sayfa</a> › <a href="/receipe-post.html">Tarif</a> › Vejetaryen Peynirli Salata
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1>Vejetaryen Peynirli Salata</h1>
+        <p><strong>Hazırlık:</strong> 15 dk • <strong>Pişirme:</strong> 0 dk • <strong>Kaç Kişilik:</strong> 4</p>
+        <img src="/img/bg-img/bg5.jpg" alt="Vejetaryen Peynirli Salata" style="max-width:100%;height:auto">
+
+        <section>
+            <h2>Malzemeler</h2>
+            <ul>
+                <li>200g karışık yeşillik</li>
+                <li>150g beyaz peynir</li>
+                <li>1 adet avokado</li>
+                <li>1/2 su bardağı kiraz domates</li>
+                <li>2 yemek kaşığı zeytinyağı</li>
+                <li>1 yemek kaşığı limon suyu</li>
+                <li>Tuz, karabiber</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Hazırlık</h2>
+            <ol>
+                <li>Yeşillikleri yıkayıp süzün.</li>
+                <li>Peynirleri küçük parçalar halinde kesin, avokadoyu dilimleyin.</li>
+                <li>Tüm malzemeleri geniş bir kaba alın, zeytinyağı ve limon suyunu ekleyip karıştırın.</li>
+                <li>Tuz ve karabiber ile tatlandırıp servis yapın.</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>Puanlama</h2>
+            <div class="rating" data-recipe-id="vejetaryen-peynirli-salata"></div>
+        </section>
+
+        <p><a href="/index.html">‹ Geri dön</a></p>
+    </main>
+
+    <script src="/js/recipes.js"></script>
+        <script>
+        // Load recipe data from backend API if available
+        (function(){
+            var id = 'vejetaryen-peynirli-salata';
+            function render(data){
+                try{
+                    document.querySelector('main h1').textContent = data.title || '';
+                    var meta = document.querySelector('main p');
+                    if(meta) meta.innerHTML = (data.prep?'<strong>Hazırlık:</strong> '+data.prep+' • ':'') + (data.cook?'<strong>Pişirme:</strong> '+data.cook+' • ':'') + (data.servings?'<strong>Kaç Kişilik:</strong> '+data.servings:'');
+                    var img = document.querySelector('main img');
+                    if(img && data.image) img.src = data.image;
+                    // ingredients
+                    var ing = document.querySelector('section h2 + ul');
+                    if(ing && data.ingredients){
+                        ing.innerHTML = '';
+                        data.ingredients.forEach(function(i){ var li = document.createElement('li'); li.textContent = i; ing.appendChild(li); });
+                    }
+                    var steps = document.querySelector('section + section ol');
+                    if(steps && data.steps){ steps.innerHTML = ''; data.steps.forEach(function(s){ var li = document.createElement('li'); li.textContent = s; steps.appendChild(li); }); }
+                }catch(e){ console.error(e); }
+            }
+            fetch('/api/recipes/'+id).then(function(res){ if(!res.ok) throw new Error('no api'); return res.json(); }).then(render).catch(function(){ /* ignore, keep static */ });
+        })();
+        </script>
+</body>
+</html>

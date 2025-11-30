@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vegan Smoothie — Delicious</title>
+    <link rel="icon" href="/img/core-img/favicon.ico">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/index.html">Ana Sayfa</a> › <a href="/receipe-post.html">Tarif</a> › Vegan Smoothie
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1>Vegan Smoothie</h1>
+        <p><strong>Hazırlık:</strong> 5 dk • <strong>Pişirme:</strong> 0 dk • <strong>Kaç Kişilik:</strong> 2</p>
+        <img src="/img/bg-img/r3.jpg" alt="Vegan Smoothie" style="max-width:100%;height:auto">
+
+        <section>
+            <h2>Malzemeler</h2>
+            <ul>
+                <li>1 muz</li>
+                <li>1 su bardağı badem sütü</li>
+                <li>1/2 su bardağı donmuş yaban mersini</li>
+                <li>1 yemek kaşığı chia tohumu</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Hazırlık</h2>
+            <ol>
+                <li>Tüm malzemeleri blendere koyun.</li>
+                <li>Pürüzsüz olana kadar çekin ve bardaklara dökün.</li>
+                <li>Üzerine chia serpip servis yapın.</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>Puanlama</h2>
+            <div class="rating" data-recipe-id="vegan-smoothie"></div>
+        </section>
+
+        <p><a href="/index.html">‹ Geri dön</a></p>
+    </main>
+
+    <script src="/js/recipes.js"></script>
+        <script>
+        (function(){
+            var id = 'vegan-smoothie';
+            function render(data){
+                try{
+                    document.querySelector('main h1').textContent = data.title || '';
+                    var meta = document.querySelector('main p');
+                    if(meta) meta.innerHTML = (data.prep?'<strong>Hazırlık:</strong> '+data.prep+' • ':'') + (data.cook?'<strong>Pişirme:</strong> '+data.cook+' • ':'') + (data.servings?'<strong>Kaç Kişilik:</strong> '+data.servings:'');
+                    var img = document.querySelector('main img');
+                    if(img && data.image) img.src = data.image;
+                    var ing = document.querySelector('section h2 + ul');
+                    if(ing && data.ingredients){ ing.innerHTML = ''; for(var i=0;i<data.ingredients.length;i++){ var li = document.createElement('li'); li.textContent = data.ingredients[i]; ing.appendChild(li); } }
+                    var steps = document.querySelector('section + section ol');
+                    if(steps && data.steps){ steps.innerHTML = ''; for(var i=0;i<data.steps.length;i++){ var li = document.createElement('li'); li.textContent = data.steps[i]; steps.appendChild(li); } }
+                }catch(e){ console.error(e); }
+            }
+            fetch('/api/recipes/'+id).then(function(res){ if(!res.ok) throw new Error('no api'); return res.json(); }).then(render).catch(function(){ });
+        })();
+        </script>
+</body>
+</html>

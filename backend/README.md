@@ -44,3 +44,4 @@ Notes
   - Use an actual database (Postgres)
   - Add proper authentication (login, sessions)
   - Add validation and error handling
+Bu bizim ilk organize çalışmamız.

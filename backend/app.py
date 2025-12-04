@@ -15,17 +15,20 @@ app.config['SQLALCHEMY_DATABASE_URI'] = DB_PATH
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# NEW FIX — Flask 2.3 uyumlu tablo oluşturma
+# Render uyumlu: veritabanını burada oluşturuyoruz
 with app.app_context():
     db.create_all()
 
-# Helper: require admin token
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+
+# Helper: require admin token in header X-Admin-Token for write operations
 def require_admin():
     token = request.headers.get('X-Admin-Token', '')
     if token != ADMIN_TOKEN:
         abort(401, description='Unauthorized')
+
 
 # API: list recipes
 @app.route('/api/recipes', methods=['GET'])
@@ -33,22 +36,28 @@ def list_recipes():
     r = Recipe.query.all()
     return jsonify([item.to_dict() for item in r])
 
+
 # API: get single recipe
 @app.route('/api/recipes/<recipe_id>', methods=['GET'])
 def get_recipe(recipe_id):
     r = Recipe.query.get_or_404(recipe_id)
     return jsonify(r.to_dict())
 
+
 # API: create recipe
 @app.route('/api/recipes', methods=['POST'])
 def create_recipe():
     require_admin()
     data = request.get_json() or {}
+
     if 'id' not in data or 'title' not in data:
         abort(400, 'id and title are required')
+
     if Recipe.query.get(data['id']):
         abort(409, 'Recipe with this id already exists')
+
     import json as _json
+
     r = Recipe(
         id=data['id'],
         title=data.get('title'),
@@ -63,9 +72,11 @@ def create_recipe():
         steps=_json.dumps(data.get('steps', [])),
         tags=_json.dumps(data.get('tags', []))
     )
+
     db.session.add(r)
     db.session.commit()
     return jsonify(r.to_dict()), 201
+
 
 # API: update
 @app.route('/api/recipes/<recipe_id>', methods=['PUT'])
@@ -73,18 +84,23 @@ def update_recipe(recipe_id):
     require_admin()
     r = Recipe.query.get_or_404(recipe_id)
     data = request.get_json() or {}
-    for key in ('title','category','excerpt','image','url','prep','cook','servings'):
+
+    for key in ('title', 'category', 'excerpt', 'image', 'url', 'prep', 'cook', 'servings'):
         if key in data:
             setattr(r, key, data[key])
+
     import json as _json
+
     if 'ingredients' in data:
         r.ingredients = _json.dumps(data['ingredients'])
     if 'steps' in data:
         r.steps = _json.dumps(data['steps'])
     if 'tags' in data:
         r.tags = _json.dumps(data['tags'])
+
     db.session.commit()
     return jsonify(r.to_dict())
+
 
 # API: delete
 @app.route('/api/recipes/<recipe_id>', methods=['DELETE'])
@@ -95,5 +111,6 @@ def delete_recipe(recipe_id):
     db.session.commit()
     return jsonify({'deleted': recipe_id})
 
+
 if __name__ == '__main__':
-    app.run(debug=True, port=int(os.getenv('PORT', 5000)))
+    app.run(host="0.0.0.0", debug=True, port=int(os.getenv('PORT', 5000)))

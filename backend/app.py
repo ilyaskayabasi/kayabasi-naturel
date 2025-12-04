@@ -17,11 +17,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-@app.before_first_request
-def create_tables():
+# NEW FIX — Flask 2.3 uyumlu tablo oluşturma
+with app.app_context():
     db.create_all()
 
-# Helper: require admin token in header X-Admin-Token for write operations
+# Helper: require admin token
 def require_admin():
     token = request.headers.get('X-Admin-Token', '')
     if token != ADMIN_TOKEN:

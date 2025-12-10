@@ -3,7 +3,13 @@ from django.urls import reverse
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 import stripe
-from stripe.error import SignatureVerificationError
+
+# stripe.error may not be importable in some environments; fall back so tests can run
+try:
+    from stripe.error import SignatureVerificationError
+except Exception:
+    class SignatureVerificationError(Exception):
+        pass
 
 from .models import Product, Category, Order, OrderItem
 

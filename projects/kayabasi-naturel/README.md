@@ -36,3 +36,26 @@ python manage.py runserver
  Sepet ve sipariş akışı özet:
  - Sepet: Session tabanlı (kullanıcı girişine bağlı değil). `add_to_cart`, `view_cart` ve `checkout` view'leri eklendi.
  - Sipariş: `Order` ve `OrderItem` modelleri oluşturuldu, admin üzerinden görüntülenebilir.
+ 
+Docker & deploy (hızlı notlar):
+- Bu klasörde bir `Dockerfile` ve `docker-compose.yml` bulunmaktadır. Basit bir Postgres servisi ile birlikte uygulamayı docker-compose ile çalıştırabilirsiniz.
+- Örnek kullanım (projede `.env.example` dosyasını kopyalayıp `.env` yapın ve değerleri doldurun):
+
+```powershell
+Set-Location .\projects\kayabasi-naturel
+copy .env.example .env
+# Edit .env ve gerekli anahtarları ayarla
+docker compose up --build
+```
+
+Stripe webhook testi (local + ngrok):
+- Stripe Dashboard içinde bir webhook endpoint ekleyin; URL olarak `https://<your-ngrok>.ngrok.io/stripe/webhook/` kullanın ve event türü olarak `payment_intent.succeeded` seçin.
+- Localde sunucuyu çalıştırmak için ngrok kullanın:
+
+```powershell
+ngrok http 8000
+```
+
+- Ardından Stripe Dashboard'dan test ödemesi yapın; webhook geldiğinde `Order.paid` alanı güncellenecektir.
+
+Not: production için `DEBUG=False`, güvenli `SECRET_KEY`, HTTPS, webhook secret ve güçlü veritabanı ayarları ayarlayın.

@@ -59,3 +59,19 @@ ngrok http 8000
 - Ardından Stripe Dashboard'dan test ödemesi yapın; webhook geldiğinde `Order.paid` alanı güncellenecektir.
 
 Not: production için `DEBUG=False`, güvenli `SECRET_KEY`, HTTPS, webhook secret ve güçlü veritabanı ayarları ayarlayın.
+
+Hızlı kurulum scriptleri:
+- `.`\generate_env.py` — `.env.example`'den `.env` oluşturur ve `SECRET_KEY` üretir.
+- `.`\setup_local.ps1` — PowerShell script; venv oluşturur, bağımlılıkları yükler, migrate çalıştırır ve dev sunucusunu başlatır. Süper kullanıcı yaratmak için önce ortam değişkeni `DJANGO_SUPERUSER_USERNAME` ve `DJANGO_SUPERUSER_PASSWORD` ayarlayın ve script'i `-CreateSuperUser` ile çalıştırın.
+
+Örnek (PowerShell):
+```powershell
+Set-Location .\projects\kayabasi-naturel
+python generate_env.py
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+# veya otomatik kurulum
+.\setup_local.ps1 -CreateSuperUser
+```

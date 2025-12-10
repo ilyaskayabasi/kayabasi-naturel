@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="mb-4">Ödeme</h1>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">İsim Soyisim</label>
+      <input name="full_name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      <input name="email" type="email" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Adres</label>
+      <textarea name="address" class="form-control" required></textarea>
+    </div>
+
+    <h3>Sepet</h3>
+    <ul>
+      {% for it in items %}
+        <li>{{ it.product.name }} — {{ it.quantity }} adet — {{ it.total }} TL</li>
+      {% endfor %}
+    </ul>
+    <p class="fw-bold">Toplam: {{ total }} TL</p>
+    <button class="btn btn-success" type="submit">Siparişi Oluştur ve Ödeme</button>
+    <a class="btn btn-secondary ms-2" href="{% url 'store:view_cart' %}">Sepete geri dön</a>
+  </form>
+{% endblock %}

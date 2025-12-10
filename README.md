@@ -6,7 +6,7 @@ Bu depo `Delicious` HTML şablonunu temel alır; ben de projeyi Türkçe bir yem
 Yerelde görüntülemek için:
 
 ```bash
-cd /Users/doguhantaskin/Desktop/delicious-master
+# Terminalde depo köküne gidin (ör. proje klasörünüz)
 python3 -m http.server 8000
 # Tarayıcıda: http://localhost:8000
 ```

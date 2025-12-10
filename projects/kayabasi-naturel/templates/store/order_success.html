@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Teşekkürler!</h1>
+  {% if order %}
+    <p>Sipariş numaranız: {{ order.id }}</p>
+    <p>İsim: {{ order.full_name }}</p>
+    <p>Email: {{ order.email }}</p>
+    <p>Adres: {{ order.address }}</p>
+  {% else %}
+    <p>Sipariş bilgisi bulunamadı.</p>
+  {% endif %}
+  <p><a class="btn btn-primary" href="/">Ana sayfaya dön</a></p>
+{% endblock %}

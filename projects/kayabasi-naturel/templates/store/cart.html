@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="mb-4">Sepetiniz</h1>
+  {% if items %}
+    <table class="table">
+      <thead><tr><th>Ürün</th><th>Adet</th><th>Toplam</th></tr></thead>
+      <tbody>
+      {% for it in items %}
+        <tr>
+          <td>{{ it.product.name }}</td>
+          <td>{{ it.quantity }}</td>
+          <td>{{ it.total }} TL</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p class="fw-bold">Toplam: {{ total }} TL</p>
+    <a class="btn btn-primary" href="{% url 'store:checkout' %}">Ödeme Yap</a>
+  {% else %}
+    <p>Sepet boş.</p>
+    <a class="btn btn-secondary" href="/">Alışverişe Devam Et</a>
+  {% endif %}
+{% endblock %}

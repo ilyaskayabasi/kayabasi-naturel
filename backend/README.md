@@ -5,9 +5,13 @@ Quick start (macOS / zsh):
 1. Create virtualenv and install dependencies
 
 ```bash
-cd /Users/doguhantaskin/Desktop/delicious-master/backend
+# repository root içinde backend klasörüne gidin
+cd ./backend
 python3 -m venv .venv
+# macOS / Linux kullanıyorsanız:
 source .venv/bin/activate
+# Windows PowerShell kullanıyorsanız:
+# .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 

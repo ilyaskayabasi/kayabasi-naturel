@@ -114,3 +114,72 @@ def delete_recipe(recipe_id):
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=int(os.getenv('PORT', 5000)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# --- ADMIN IMPORT ENDPOINT ---
+import json
+from models import Recipe, db
+
+@app.route('/admin/import', methods=['POST'])
+def admin_import():
+    token = request.headers.get("X-Admin-Token")
+    if token != os.getenv("ADMIN_TOKEN"):
+        return {"error": "unauthorized"}, 401
+
+    DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'recipes.json')
+
+    if not os.path.exists(DATA_FILE):
+        return {"error": "recipes.json not found"}, 404
+
+    with open(DATA_FILE, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    added = 0
+    skipped = 0
+
+    for item in data:
+        if Recipe.query.get(item['id']):
+            skipped += 1
+            continue
+
+        r = Recipe(
+            id=item['id'],
+            title=item.get('title'),
+            category=item.get('category'),
+            excerpt=item.get('excerpt'),
+            image=item.get('image'),
+            url=item.get('url'),
+            prep=item.get('prep'),
+            cook=item.get('cook'),
+            servings=item.get('servings'),
+            ingredients=json.dumps(item.get('ingredients', [])),
+            steps=json.dumps(item.get('steps', [])),
+            tags=json.dumps(item.get('tags', [])),
+        )
+        db.session.add(r)
+        added += 1
+
+    db.session.commit()
+
+    return {
+        "status": "import complete",
+        "added": added,
+        "skipped": skipped
+    }

@@ -11,8 +11,13 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'change-me-for-production')
 # Debug from env (default True for local dev)
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-# Allowed hosts (comma separated in env)
-ALLOWED_HOSTS = [h for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h]
+# Allowed hosts (comma separated in env). If none provided, include safe defaults for local dev.
+_env_hosts = [h for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h]
+if _env_hosts:
+    ALLOWED_HOSTS = _env_hosts
+else:
+    # local development defaults
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Database: use DATABASE_URL if provided, else sqlite
 DATABASE_URL = os.getenv('DATABASE_URL', '')

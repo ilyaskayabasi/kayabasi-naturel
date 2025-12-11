@@ -12,10 +12,10 @@ git push origin main
 
 2) GitHub Actions otomatik olarak çalışacak ve `gh-pages` dalına siteyi yayınlayacak. Yayınlandıktan sonra erişim şu URL'lerde olabilir:
 
-- Varsayılan GitHub Pages URL: `https://nefisyemek.github.io/nefistarif.io`
-- Eğer `CNAME` ve DNS doğruysa: `https://nefistarif.io`
+ - Varsayılan GitHub Pages URL: `https://<your-username>.github.io/<repo-name>`
+ - Eğer özel bir domain kullanacaksanız: `https://<your-domain>` (ör. `https://example.com`)
 
-3) DNS kontrolü (eğer `nefistarif.io` domaini kendi kontrolünüzdeyse):
+3) DNS kontrolü (eğer özel domaininizi kendi kontrolünüzdeyse):
 
  - Alan adınızın DNS paneline `A` veya `CNAME` kayıtlarını ekleyin. GitHub Pages için genelde `A` kayıtları kullanılır:
 

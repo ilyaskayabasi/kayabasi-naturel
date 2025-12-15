@@ -30,21 +30,21 @@ if ($CreateSuperUser) {
     if ($admin_user -and $admin_pass) {
         Write-Host "Creating superuser $admin_user"
         python manage.py createsuperuser --noinput --username $admin_user --email $admin_email
-        # set password via Django shell
-        $py = @'
-from django.contrib.auth import get_user_model
-User = get_user_model()
-u = User.objects.get(username="' + $admin_user + '")
-u.set_password("' + $admin_pass + '")
+        # set password by writing a temporary python script and running it (avoids quoting issues)
+        $tmp = [System.IO.Path]::Combine($PWD.Path, '._set_su_tmp.py')
+        $py = @"
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    u = User.objects.get(username='$admin_user')
+u.set_password('$admin_pass')
 u.save()
-'@
-        python - <<EOF
-$py
-EOF
+"@
+        $py | Out-File -Encoding utf8 -FilePath $tmp
+        python $tmp
+        Remove-Item $tmp -Force
     } else {
         Write-Host "DJANGO_SUPERUSER_USERNAME and DJANGO_SUPERUSER_PASSWORD env vars not set; skipping superuser creation."
     }
 }
 
-Write-Host "Starting development server (Ctrl+C to stop)..."
-python manage.py runserver
+Write-Host "Setup complete. To start the development server, run:`n .\.venv\Scripts\Activate.ps1`n python manage.py runserver"

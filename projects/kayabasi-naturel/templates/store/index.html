@@ -1,20 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1 class="mb-4">Ürünler</h1>
-  <div class="row">
+  <div class="hero bg-light rounded p-4 mb-4">
+    <div class="d-md-flex align-items-center">
+      <div class="me-4">
+        <h1 class="display-6 mb-1">Kayabaşı Naturel</h1>
+        <p class="mb-0 text-muted">Zeytin, zeytinyağı ve arı ürünlerinde doğal ve güvenilir lezzetler.</p>
+      </div>
+      <div class="ms-auto d-none d-md-block">
+        <a href="#products" class="btn btn-success btn-lg">Ürünlere Göz At</a>
+      </div>
+    </div>
+  </div>
+
+  <h2 id="products" class="mb-4">Öne Çıkan Ürünler</h2>
+  <div class="row g-4">
     {% for p in products %}
-      <div class="col-md-4 mb-3">
-        <div class="card h-100">
+      <div class="col-sm-6 col-md-4">
+        <div class="card h-100 shadow-sm product-card">
           {% if p.image %}
-            <img src="{{ p.image.url }}" class="card-img-top" alt="{{ p.name }}">
+            <img src="{{ p.image.url }}" class="card-img-top product-img" alt="{{ p.name }}">
+          {% else %}
+            <img src="https://placehold.co/600x400?text=Resim+Yok" class="card-img-top product-img" alt="{{ p.name }}">
           {% endif %}
           <div class="card-body d-flex flex-column">
+            <div class="mb-2">
+              {% if p.category %}<span class="badge bg-success">{{ p.category.name }}</span>{% endif %}
+            </div>
             <h5 class="card-title">{{ p.name }}</h5>
-            <p class="card-text">{{ p.description|truncatechars:100 }}</p>
-            <div class="mt-auto">
-              <p class="mb-1"><strong>{{ p.price }} TL</strong></p>
-              <a class="btn btn-sm btn-primary" href="{% url 'store:product_detail' p.slug %}">Detay</a>
+            <p class="card-text text-muted small">{{ p.description|truncatechars:120 }}</p>
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+              <div><strong class="text-primary">{{ p.price }} TL</strong></div>
+              <div>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'store:product_detail' p.slug %}">Detay</a>
+                <a class="btn btn-sm btn-success ms-2" href="{% url 'store:add_to_cart' p.slug %}">Sepete Ekle</a>
+              </div>
             </div>
           </div>
         </div>

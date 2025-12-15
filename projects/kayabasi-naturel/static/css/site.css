@@ -1,0 +1,19 @@
+/* site.css - basic professional styling for Kayabaşı Naturel */
+:root{
+  --brand-green:#146c43;
+  --brand-accent:#f4f7f2;
+}
+body{background:linear-gradient(180deg,#f8faf7 0%, #ffffff 60%);font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;color:#233d2b}
+.hero{background:var(--brand-accent);border-left:4px solid var(--brand-green)}
+.product-card{transition:transform .15s ease, box-shadow .15s ease}
+.product-card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.product-img{height:200px;object-fit:cover}
+.navbar .nav-link{color:rgba(255,255,255,.95)}
+.footer{background:#0b2e1b;color:#cfe9d8;padding:2rem 0}
+.footer a{color:#e6f6ea}
+.badge.bg-success{background:var(--brand-green)}
+
+@media (max-width:576px){.product-img{height:160px}}
+
+/* utility tweaks */
+.text-primary{color:var(--brand-green) !important}

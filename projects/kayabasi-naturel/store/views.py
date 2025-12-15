@@ -26,6 +26,10 @@ def product_detail(request, slug):
     return render(request, 'store/detail.html', {'product': product})
 
 
+def about(request):
+    return render(request, 'about.html')
+
+
 def add_to_cart(request, slug):
     product = get_object_or_404(Product, slug=slug)
     cart = request.session.get('cart', {})

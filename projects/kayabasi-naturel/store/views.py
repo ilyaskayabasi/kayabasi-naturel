@@ -50,7 +50,7 @@ def view_cart(request):
         price = product.price
         items.append({'product': product, 'quantity': quantity, 'total': price * quantity})
         total += price * quantity
-    return render(request, 'store/cart.html', {'items': items, 'total': total})
+    return render(request, 'store/cart_v2.html', {'items': items, 'total': total})
 
 
 def checkout(request):

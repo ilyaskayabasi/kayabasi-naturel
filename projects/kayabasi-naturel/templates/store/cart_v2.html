@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-4">
+    <h1 class="mb-4">Sepetiniz</h1>
+    {% if items %}
+      <div class="list-group mb-3">
+        {% for it in items %}
+          <div class="list-group-item d-flex align-items-center">
+            <div class="me-3" style="width:120px;">
+              {% if it.product.image %}
+                <img src="{{ it.product.image.url }}" class="img-fluid rounded" alt="{{ it.product.name }}">
+              {% else %}
+                <img src="https://placehold.co/240x160?text=Resim" class="img-fluid rounded" alt="{{ it.product.name }}">
+              {% endif %}
+            </div>
+            <div class="flex-grow-1">
+              <h5 class="mb-1">{{ it.product.name }}</h5>
+              <p class="mb-1 text-muted small">Birim fiyat: {{ it.product.price }} TL</p>
+              <p class="mb-0">Adet: {{ it.quantity }} — Ara Toplam: <strong>{{ it.total }} TL</strong></p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <a class="btn btn-outline-secondary" href="{% url 'store:index' %}">Alışverişe Devam Et</a>
+        </div>
+        <div>
+          <span class="h5 me-3">Toplam: <strong class="text-primary">{{ total }} TL</strong></span>
+          <a class="btn btn-success" href="{% url 'store:checkout' %}">Ödeme Yap</a>
+        </div>
+      </div>
+    {% else %}
+      <p>Sepet boş.</p>
+      <a class="btn btn-secondary" href="/">Alışverişe Devam Et</a>
+    {% endif %}
+  </div>
+{% endblock %}

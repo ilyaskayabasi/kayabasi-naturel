@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Giriş Yap - Kayabaşı Naturel{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 80px; margin-bottom: 80px;">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-5">
+                        <h2 class="mb-2">Giriş Yap</h2>
+                        <p class="text-muted">Hesabınıza giriş yaparak alışverişe devam edin</p>
+                    </div>
+
+                    <!-- Hata ve başarı mesajları -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Kullanıcı Adı</label>
+                            <input type="text" class="form-control form-control-lg" id="username" name="username" placeholder="Kullanıcı adınız" required>
+                            <small class="form-text text-muted">E-posta veya kullanıcı adınız</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Şifre</label>
+                            <input type="password" class="form-control form-control-lg" id="password" name="password" placeholder="Şifreniz" required>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">Giriş Yap</button>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="text-center">
+                            <p class="mb-0">Hesabınız yok mu? <a href="{% url 'store:register' %}" class="text-success fw-bold">Kayıt Ol</a></p>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <a href="{% url 'store:index' %}" class="text-muted">Ana sayfaya dön</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bilgi kartı -->
+            <div class="mt-4 p-4 bg-light rounded">
+                <h5 class="mb-3">Demo Hesabı</h5>
+                <p class="mb-1"><strong>Kullanıcı Adı:</strong> demo</p>
+                <p class="mb-0"><strong>Şifre:</strong> demo1234</p>
+                <p class="text-muted small mt-2">Test amaçlı kullanabilirsiniz</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -22,7 +22,22 @@
             <li class="nav-item me-3"><a class="nav-link text-white" href="/">Ana Sayfa</a></li>
             <li class="nav-item me-3"><a class="nav-link text-white" href="{% url 'store:about' %}">Hakkımızda</a></li>
             <li class="nav-item me-3"><a class="nav-link text-white" href="{% url 'store:view_cart' %}">Sepet (<span id="cart-count">{{ cart_count|default:0 }}</span>)</a></li>
-            <li class="nav-item"><a class="btn btn-outline-light btn-sm" href="/login">Giriş / Kayıt</a></li>
+            {% if user.is_authenticated %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-person"></i> {{ user.first_name|default:user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="#">Profil</a></li>
+                  <li><a class="dropdown-item" href="#">Siparişlerim</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="{% url 'store:logout' %}">Çıkış Yap</a></li>
+                </ul>
+              </li>
+            {% else %}
+              <li class="nav-item me-2"><a class="btn btn-outline-light btn-sm" href="{% url 'store:login' %}">Giriş Yap</a></li>
+              <li class="nav-item"><a class="btn btn-light btn-sm" href="{% url 'store:register' %}">Kayıt Ol</a></li>
+            {% endif %}
           </ul>
         </div>
       </div>

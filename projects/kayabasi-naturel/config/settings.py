@@ -17,7 +17,7 @@ if _env_hosts:
     ALLOWED_HOSTS = _env_hosts
 else:
     # local development defaults
-    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+    ALLOWED_HOSTS = ['*']  # Allow all hosts for local development
 
 # Database: use DATABASE_URL if provided, else sqlite
 DATABASE_URL = os.getenv('DATABASE_URL', '')

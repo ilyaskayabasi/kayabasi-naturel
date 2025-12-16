@@ -13,4 +13,8 @@ urlpatterns = [
     path('order/success/', views.order_success, name='order_success'),
     path('stripe/webhook/', views.stripe_webhook, name='stripe_webhook'),
     path('about/', views.about, name='about'),
+    # Auth URLs
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('register/', views.register_view, name='register'),
 ]

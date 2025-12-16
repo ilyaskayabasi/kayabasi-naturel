@@ -2,6 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 import stripe
 
 # stripe.error may not be importable in some environments; fall back so tests can run
@@ -205,3 +209,79 @@ def stripe_webhook(request):
                 pass
 
     return JsonResponse({'status': 'received'})
+
+
+# Giriş (Login)
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('store:index')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            messages.success(request, f'Hoşgeldin {user.first_name or user.username}!')
+            return redirect('store:index')
+        else:
+            messages.error(request, 'Kullanıcı adı veya şifre yanlış.')
+    
+    return render(request, 'auth/login.html')
+
+
+# Çıkış (Logout)
+def logout_view(request):
+    logout(request)
+    messages.success(request, 'Başarıyla çıkış yapıldı.')
+    return redirect('store:index')
+
+
+# Kayıt (Register)
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('store:index')
+    
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        username = request.POST.get('username')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        
+        # Validasyon
+        if not all([first_name, last_name, email, username, password1, password2]):
+            messages.error(request, 'Lütfen tüm alanları doldurun.')
+            return render(request, 'auth/register.html')
+        
+        if password1 != password2:
+            messages.error(request, 'Şifreler eşleşmiyor.')
+            return render(request, 'auth/register.html')
+        
+        if len(password1) < 8:
+            messages.error(request, 'Şifre en az 8 karakter olmalıdır.')
+            return render(request, 'auth/register.html')
+        
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Bu kullanıcı adı zaten alınmış.')
+            return render(request, 'auth/register.html')
+        
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Bu e-posta zaten kayıtlı.')
+            return render(request, 'auth/register.html')
+        
+        # Kullanıcı oluştur
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password1,
+            first_name=first_name,
+            last_name=last_name
+        )
+        
+        messages.success(request, 'Kayıt başarılı! Giriş yapabilirsiniz.')
+        return redirect('auth:login')
+    
+    return render(request, 'auth/register.html')

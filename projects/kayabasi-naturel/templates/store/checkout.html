@@ -72,10 +72,43 @@
               <textarea name="order_notes" class="form-control" rows="3" placeholder="Siparişiniz hakkında eklemek istediğiniz notlar (örn: teslimat tercihleri)"></textarea>
             </div>
 
-            <!-- Ödeme Yöntemi Bilgisi -->
-            <div class="alert alert-info border-0">
-              <h6 class="alert-heading"><i class="fas fa-credit-card me-2"></i>Ödeme Yöntemi</h6>
-              <p class="mb-0 small">Siparişinizi tamamladıktan sonra ödeme sayfasına yönlendirileceksiniz. Güvenli ödeme altyapımız ile kredi kartı veya banka kartı ile ödeme yapabilirsiniz.</p>
+            <!-- Ödeme Bilgileri -->
+            <div class="mb-4">
+              <h6 class="text-success mb-3">Kart Bilgileri</h6>
+              
+              <div class="alert alert-info border-0 mb-3">
+                <small><i class="fas fa-info-circle me-1"></i>Ödeme bilgileriniz güvenli bir şekilde işlenir ve saklanmaz.</small>
+              </div>
+
+              <div class="card border-0 bg-light p-3 mb-3">
+                <label class="form-label fw-bold mb-2">Kart Üzerindeki İsim</label>
+                <input type="text" class="form-control form-control-lg mb-3" placeholder="AD SOYAD" required>
+                
+                <label class="form-label fw-bold mb-2">Kart Numarası</label>
+                <input type="text" class="form-control form-control-lg mb-3" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                
+                <div class="row g-3">
+                  <div class="col-6">
+                    <label class="form-label fw-bold mb-2">Son Kullanma Tarihi</label>
+                    <input type="text" class="form-control form-control-lg" placeholder="AA/YY" maxlength="5" required>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label fw-bold mb-2">CVV</label>
+                    <input type="text" class="form-control form-control-lg" placeholder="123" maxlength="3" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="saveCard">
+                <label class="form-check-label" for="saveCard">
+                  Kart bilgilerimi güvenli şekilde kaydet (gelecek alışverişler için)
+                </label>
+              </div>
+
+              <div class="alert alert-warning border-0">
+                <small><i class="fas fa-exclamation-triangle me-1"></i><strong>Test Modu:</strong> Stripe API anahtarları yapılandırılmadığı için test modunda çalışıyoruz. Gerçek ödeme alınmayacaktır.</small>
+              </div>
             </div>
 
             <div class="d-grid gap-2 d-md-flex justify-content-md-between mt-4">
@@ -83,7 +116,7 @@
                 <i class="fas fa-arrow-left me-2"></i>Sepete Dön
               </a>
               <button type="submit" class="btn btn-success btn-lg px-5">
-                Siparişi Tamamla <i class="fas fa-arrow-right ms-2"></i>
+                <i class="fas fa-lock me-2"></i>Ödemeyi Tamamla ({{ genel_toplam }} TL)
               </button>
             </div>
           </form>

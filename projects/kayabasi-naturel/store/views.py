@@ -285,3 +285,14 @@ def register_view(request):
         return redirect('store:login')
     
     return render(request, 'auth/register.html')
+
+
+# Siparişlerim (Order History)
+@login_required(login_url='store:login')
+def order_history(request):
+    orders = Order.objects.filter(email=request.user.email).order_by('-created_at')
+    
+    context = {
+        'orders': orders,
+    }
+    return render(request, 'store/order_history.html', context)

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Siparişlerim - Kayabaşı Naturel{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 80px; margin-bottom: 80px;">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <h2 class="mb-4">Siparişlerim</h2>
+
+            {% if orders %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-success">
+                            <tr>
+                                <th>Sipariş No</th>
+                                <th>Tarih</th>
+                                <th>Durum</th>
+                                <th>Tutar</th>
+                                <th>Ödeme</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td><strong>#{{ order.id }}</strong></td>
+                                    <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                    <td>
+                                        {% if order.status == 'pending' %}
+                                            <span class="badge bg-warning">Beklemede</span>
+                                        {% elif order.status == 'confirmed' %}
+                                            <span class="badge bg-info">Onaylandı</span>
+                                        {% elif order.status == 'processing' %}
+                                            <span class="badge bg-primary">Hazırlanıyor</span>
+                                        {% elif order.status == 'shipped' %}
+                                            <span class="badge bg-secondary">Gönderildi</span>
+                                        {% elif order.status == 'delivered' %}
+                                            <span class="badge bg-success">Teslim Edildi</span>
+                                        {% elif order.status == 'cancelled' %}
+                                            <span class="badge bg-danger">İptal Edildi</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><strong>{{ order.get_total|floatformat:2 }} TL</strong></td>
+                                    <td>
+                                        {% if order.paid %}
+                                            <span class="badge bg-success">Ödendi</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Bekliyor</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="#order-{{ order.id }}" class="btn btn-sm btn-outline-success" data-bs-toggle="collapse">
+                                            Detay
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr class="collapse" id="order-{{ order.id }}">
+                                    <td colspan="6">
+                                        <div class="p-3">
+                                            <h6 class="mb-3">Sipariş Detayları</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6>Teslimat Bilgileri</h6>
+                                                    <p class="mb-1"><strong>Ad:</strong> {{ order.full_name }}</p>
+                                                    <p class="mb-1"><strong>Tel:</strong> {{ order.phone }}</p>
+                                                    <p class="mb-1"><strong>Adres:</strong> {{ order.address }}</p>
+                                                    <p class="mb-1"><strong>İl:</strong> {{ order.city }}</p>
+                                                    <p class="mb-1"><strong>İlçe:</strong> {{ order.district }}</p>
+                                                    {% if order.postal_code %}
+                                                        <p class="mb-1"><strong>Posta Kodu:</strong> {{ order.postal_code }}</p>
+                                                    {% endif %}
+                                                    {% if order.order_notes %}
+                                                        <p class="mb-0"><strong>Not:</strong> {{ order.order_notes }}</p>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6>Ürünler</h6>
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Ürün</th>
+                                                                <th class="text-center">Adet</th>
+                                                                <th class="text-end">Fiyat</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for item in order.items.all %}
+                                                                <tr>
+                                                                    <td>{{ item.product.name }}</td>
+                                                                    <td class="text-center">{{ item.quantity }}</td>
+                                                                    <td class="text-end">{{ item.price|floatformat:2 }} TL</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                            <tr class="table-active">
+                                                                <td colspan="2" class="text-end"><strong>Toplam:</strong></td>
+                                                                <td class="text-end"><strong>{{ order.get_total|floatformat:2 }} TL</strong></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <h5>Henüz siparişiniz yok</h5>
+                    <p>Ürünlerimizi keşfetmek için <a href="{% url 'store:index' %}">alışverişe başla</a>.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

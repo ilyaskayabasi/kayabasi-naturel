@@ -47,12 +47,6 @@
               {% if product.production_location %}
                 <li class="mb-2"><strong>Üretim Yeri:</strong> {{ product.production_location }}</li>
               {% endif %}
-              {% if product.production_date %}
-                <li class="mb-2"><strong>Üretim Tarihi:</strong> {{ product.production_date|date:"d.m.Y" }}</li>
-              {% endif %}
-              {% if product.harvest_date %}
-                <li class="mb-2"><strong>Hasat Tarihi:</strong> {{ product.harvest_date|date:"d.m.Y" }}</li>
-              {% endif %}
               {% if product.shelf_life %}
                 <li class="mb-2"><strong>Raf Ömrü:</strong> {{ product.shelf_life }}</li>
               {% endif %}

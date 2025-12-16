@@ -80,23 +80,15 @@
                         </h5>
 
                         <!-- Rating -->
-                        {% if product.reviews.exists %}
+                        {% if product.reviews.all %}
                         <div class="mb-2">
-                            {% with avg_rating=product.reviews.filter(is_approved=True)|dictsort:"rating"|length %}
-                            {% if product.reviews.filter(is_approved=True) %}
-                                {% with reviews=product.reviews.filter(is_approved=True) %}
-                                <small class="text-warning">
-                                    {% for i in "01234" %}
-                                        {% if forloop.counter0|add:0 < avg_rating|dictsort:"rating"|length %}
-                                            <i class="fas fa-star"></i>
-                                        {% else %}
-                                            <i class="far fa-star"></i>
-                                        {% endif %}
-                                    {% endfor %}
-                                    <span class="text-muted">({{ reviews|length }} yorum)</span>
-                                </small>
-                                {% endwith %}
-                            {% endif %}
+                            {% with approved_reviews=product.reviews.all %}
+                            <small class="text-warning">
+                                {% for i in "12345" %}
+                                    <i class="fas fa-star"></i>
+                                {% endfor %}
+                                <span class="text-muted">({{ approved_reviews|length }} yorum)</span>
+                            </small>
                             {% endwith %}
                         </div>
                         {% endif %}

@@ -24,6 +24,17 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(default=0)
     image = models.ImageField(upload_to='products/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Detaylı ürün bilgileri
+    production_date = models.DateField(null=True, blank=True, verbose_name="Üretim Tarihi")
+    production_location = models.CharField(max_length=200, default="Milas, Muğla", verbose_name="Üretim Yeri")
+    harvest_date = models.DateField(null=True, blank=True, verbose_name="Hasat Tarihi")
+    production_process = models.TextField(blank=True, verbose_name="Üretim Süreci")
+    ingredients = models.TextField(blank=True, verbose_name="İçerik Bilgisi")
+    storage_conditions = models.TextField(blank=True, verbose_name="Saklama Koşulları")
+    shelf_life = models.CharField(max_length=100, blank=True, verbose_name="Raf Ömrü")
+    weight = models.CharField(max_length=50, blank=True, verbose_name="Net Ağırlık")
+    certificates = models.TextField(blank=True, verbose_name="Sertifikalar")
 
     class Meta:
         ordering = ['-created_at']

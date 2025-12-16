@@ -63,16 +63,16 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('order_number', 'full_name', 'phone', 'city', 'order_total', 'payment_status', 'created_at')
-    list_filter = ('paid', 'created_at', 'city')
+    list_display = ('order_number', 'full_name', 'phone', 'city', 'order_total', 'status_badge', 'payment_status', 'created_at')
+    list_filter = ('status', 'paid', 'created_at', 'city')
     search_fields = ('full_name', 'email', 'phone', 'address', 'city', 'district')
-    readonly_fields = ('created_at', 'stripe_payment_intent', 'order_total')
+    readonly_fields = ('created_at', 'updated_at', 'stripe_payment_intent', 'order_total')
     inlines = [OrderItemInline]
     date_hierarchy = 'created_at'
     
     fieldsets = (
         ('Sipariş Bilgileri', {
-            'fields': ('created_at', 'order_total', 'paid', 'stripe_payment_intent')
+            'fields': ('created_at', 'updated_at', 'status', 'order_total', 'paid', 'stripe_payment_intent')
         }),
         ('Müşteri Bilgileri', {
             'fields': ('full_name', 'email', 'phone')
@@ -95,22 +95,78 @@ class OrderAdmin(admin.ModelAdmin):
         return f"{total} TL"
     order_total.short_description = 'Toplam Tutar'
     
+    def status_badge(self, obj):
+        colors = {
+            'pending': '#ffc107',
+            'confirmed': '#17a2b8',
+            'processing': '#007bff',
+            'shipped': '#6f42c1',
+            'delivered': '#28a745',
+            'cancelled': '#dc3545',
+        }
+        color = colors.get(obj.status, '#6c757d')
+        text = dict(obj.STATUS_CHOICES).get(obj.status, obj.status)
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold;">{}</span>',
+            color, text
+        )
+    status_badge.short_description = 'Durum'
+    
     def payment_status(self, obj):
         if obj.paid:
             return format_html('<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Ödendi</span>')
         else:
             return format_html('<span style="background-color: #ffc107; color: black; padding: 3px 10px; border-radius: 3px;">Bekliyor</span>')
-    payment_status.short_description = 'Ödeme Durumu'
+    payment_status.short_description = 'Ödeme'
     
-    actions = ['mark_as_paid', 'mark_as_unpaid']
+    actions = [
+        'mark_as_pending',
+        'mark_as_confirmed',
+        'mark_as_processing',
+        'mark_as_shipped',
+        'mark_as_delivered',
+        'mark_as_cancelled',
+        'mark_as_paid',
+        'mark_as_unpaid',
+    ]
+    
+    def mark_as_pending(self, request, queryset):
+        updated = queryset.update(status='pending')
+        self.message_user(request, f'{updated} sipariş "Beklemede" olarak güncellendi.')
+    mark_as_pending.short_description = '✓ Durum: Beklemede'
+    
+    def mark_as_confirmed(self, request, queryset):
+        updated = queryset.update(status='confirmed')
+        self.message_user(request, f'{updated} sipariş "Onaylandı" olarak güncellendi.')
+    mark_as_confirmed.short_description = '✓ Durum: Onaylandı'
+    
+    def mark_as_processing(self, request, queryset):
+        updated = queryset.update(status='processing')
+        self.message_user(request, f'{updated} sipariş "Hazırlanıyor" olarak güncellendi.')
+    mark_as_processing.short_description = '✓ Durum: Hazırlanıyor'
+    
+    def mark_as_shipped(self, request, queryset):
+        updated = queryset.update(status='shipped')
+        self.message_user(request, f'{updated} sipariş "Gönderildi" olarak güncellendi.')
+    mark_as_shipped.short_description = '✓ Durum: Gönderildi'
+    
+    def mark_as_delivered(self, request, queryset):
+        updated = queryset.update(status='delivered')
+        self.message_user(request, f'{updated} sipariş "Teslim Edildi" olarak güncellendi.')
+    mark_as_delivered.short_description = '✓ Durum: Teslim Edildi'
+    
+    def mark_as_cancelled(self, request, queryset):
+        updated = queryset.update(status='cancelled')
+        self.message_user(request, f'{updated} sipariş "İptal Edildi" olarak güncellendi.')
+    mark_as_cancelled.short_description = '✗ Durum: İptal Edildi'
     
     def mark_as_paid(self, request, queryset):
         updated = queryset.update(paid=True)
         self.message_user(request, f'{updated} sipariş ödendi olarak işaretlendi.')
-    mark_as_paid.short_description = 'Seçili siparişleri ödendi olarak işaretle'
+    mark_as_paid.short_description = 'Ödendi olarak işaretle'
     
     def mark_as_unpaid(self, request, queryset):
         updated = queryset.update(paid=False)
         self.message_user(request, f'{updated} sipariş ödeme bekliyor olarak işaretlendi.')
-    mark_as_unpaid.short_description = 'Seçili siparişleri ödeme bekliyor olarak işaretle'
+    mark_as_unpaid.short_description = 'Ödeme bekliyor olarak işaretle'
 

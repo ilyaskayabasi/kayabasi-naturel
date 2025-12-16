@@ -49,6 +49,15 @@ class Product(models.Model):
 
 
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Beklemede'),
+        ('confirmed', 'Onaylandı'),
+        ('processing', 'Hazırlanıyor'),
+        ('shipped', 'Gönderildi'),
+        ('delivered', 'Teslim Edildi'),
+        ('cancelled', 'İptal Edildi'),
+    ]
+    
     full_name = models.CharField(max_length=200, verbose_name="Ad Soyad")
     email = models.EmailField(verbose_name="E-posta")
     phone = models.CharField(max_length=20, verbose_name="Telefon", default="")
@@ -57,15 +66,25 @@ class Order(models.Model):
     district = models.CharField(max_length=100, verbose_name="İlçe", default="")
     postal_code = models.CharField(max_length=10, verbose_name="Posta Kodu", blank=True, default="")
     order_notes = models.TextField(verbose_name="Sipariş Notu", blank=True, default="")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="Durum")
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Son Güncelleme")
     paid = models.BooleanField(default=False)
     stripe_payment_intent = models.CharField(max_length=200, blank=True, null=True)
 
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Sipariş"
+        verbose_name_plural = "Siparişler"
+
     def __str__(self):
-        return f"Sipariş {self.id} - {self.full_name}"
+        return f"Sipariş #{self.id} - {self.full_name}"
     
     def get_total(self):
         return sum(item.price * item.quantity for item in self.items.all())
+    
+    def get_status_display_tr(self):
+        return dict(self.STATUS_CHOICES).get(self.status)
 
 
 class OrderItem(models.Model):

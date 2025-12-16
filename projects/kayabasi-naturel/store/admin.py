@@ -26,7 +26,7 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('order_number', 'full_name', 'phone', 'city', 'order_total', 'status_badge', 'payment_status', 'created_at')
+    list_display = ('order_number', 'full_name', 'phone', 'city', 'order_total', 'status_badge', 'paid', 'created_at')
     list_filter = ('status', 'paid', 'created_at', 'city')
     search_fields = ('full_name', 'email', 'phone', 'address', 'city', 'district')
     readonly_fields = ('created_at', 'updated_at', 'stripe_payment_intent', 'order_total')
@@ -78,8 +78,7 @@ class OrderAdmin(admin.ModelAdmin):
     def payment_status(self, obj):
         if obj.paid:
             return format_html('<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Ödendi</span>')
-        else:
-            return format_html('<span style="background-color: #ffc107; color: black; padding: 3px 10px; border-radius: 3px;">Bekliyor</span>')
+        return format_html('<span style="background-color: #ffc107; color: black; padding: 3px 10px; border-radius: 3px;">Bekliyor</span>')
     payment_status.short_description = 'Ödeme'
     
     actions = [

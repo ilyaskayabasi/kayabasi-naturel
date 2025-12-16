@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Product, Category, Order, OrderItem
+from .models import Product, Category, Order, OrderItem, ProductImage, Review
 
 
 @admin.register(Category)
@@ -10,44 +10,7 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'stock', 'stock_status', 'created_at')
-    list_filter = ('category', 'created_at')
-    search_fields = ('name', 'description', 'production_location')
-    prepopulated_fields = {'slug': ('name',)}
-    list_editable = ('price', 'stock')
-    readonly_fields = ('created_at', 'slug')
-    
-    fieldsets = (
-        ('Genel Bilgiler', {
-            'fields': ('name', 'slug', 'category', 'description', 'image')
-        }),
-        ('Fiyat ve Stok', {
-            'fields': ('price', 'stock')
-        }),
-        ('Üretim Bilgileri', {
-            'fields': ('production_location', 'production_process', 'production_date', 'harvest_date'),
-            'classes': ('collapse',)
-        }),
-        ('Ürün Detayları', {
-            'fields': ('weight', 'shelf_life', 'ingredients', 'storage_conditions', 'certificates'),
-            'classes': ('collapse',)
-        }),
-        ('Tarihler', {
-            'fields': ('created_at',),
-            'classes': ('collapse',)
-        }),
-    )
-    
-    def stock_status(self, obj):
-        if obj.stock == 0:
-            return format_html('<span style="color: red; font-weight: bold;">Tükendi</span>')
-        elif obj.stock < 10:
-            return format_html('<span style="color: orange; font-weight: bold;">Az Kaldı ({})</span>', obj.stock)
-        else:
-            return format_html('<span style="color: green;">Stokta ({})</span>', obj.stock)
-    stock_status.short_description = 'Stok Durumu'
+
 
 
 class OrderItemInline(admin.TabularInline):
@@ -169,4 +132,133 @@ class OrderAdmin(admin.ModelAdmin):
         updated = queryset.update(paid=False)
         self.message_user(request, f'{updated} sipariş ödeme bekliyor olarak işaretlendi.')
     mark_as_unpaid.short_description = 'Ödeme bekliyor olarak işaretle'
+
+
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1
+    fields = ('image', 'alt_text', 'is_main', 'order')
+    ordering = ('order', 'created_at')
+
+
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ('product', 'image_preview', 'is_main', 'order')
+    list_filter = ('product', 'is_main')
+    list_editable = ('is_main', 'order')
+    ordering = ('product', 'order')
+    
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-width: 100px; max-height: 100px;" />',
+                obj.image.url
+            )
+        return "Resim Yok"
+    image_preview.short_description = 'Ön İzleme'
+
+
+class ReviewInline(admin.TabularInline):
+    model = Review
+    extra = 0
+    readonly_fields = ('user', 'created_at', 'updated_at')
+    can_delete = True
+    fields = ('user', 'rating', 'title', 'is_approved', 'created_at')
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('product', 'user', 'rating_stars', 'title', 'is_approved', 'created_at')
+    list_filter = ('rating', 'is_approved', 'product', 'created_at')
+    search_fields = ('product__name', 'user__username', 'title', 'comment')
+    readonly_fields = ('user', 'created_at', 'updated_at', 'helpful_count')
+    list_editable = ('is_approved',)
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('Yorum Bilgileri', {
+            'fields': ('product', 'user', 'rating', 'title', 'comment')
+        }),
+        ('Durum', {
+            'fields': ('is_approved', 'helpful_count')
+        }),
+        ('Tarihler', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def rating_stars(self, obj):
+        stars = '⭐' * obj.rating
+        return format_html(
+            '<span style="color: #ffc107; font-weight: bold;">{} ({})</span>',
+            stars, obj.rating
+        )
+    rating_stars.short_description = 'Puan'
+
+
+# ProductAdmin güncellendi - aşağıda tanımlı
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'price', 'stock', 'stock_status', 'avg_rating', 'review_count', 'created_at')
+    list_filter = ('category', 'created_at')
+    search_fields = ('name', 'description', 'production_location')
+    prepopulated_fields = {'slug': ('name',)}
+    list_editable = ('price', 'stock')
+    readonly_fields = ('created_at', 'slug', 'avg_rating', 'review_count')
+    inlines = [ProductImageInline, ReviewInline]
+    
+    fieldsets = (
+        ('Genel Bilgiler', {
+            'fields': ('name', 'slug', 'category', 'description', 'image')
+        }),
+        ('Fiyat ve Stok', {
+            'fields': ('price', 'stock')
+        }),
+        ('Üretim Bilgileri', {
+            'fields': ('production_location', 'production_process', 'production_date', 'harvest_date'),
+            'classes': ('collapse',)
+        }),
+        ('Ürün Detayları', {
+            'fields': ('weight', 'shelf_life', 'ingredients', 'storage_conditions', 'certificates'),
+            'classes': ('collapse',)
+        }),
+        ('İstatistikler', {
+            'fields': ('avg_rating', 'review_count'),
+            'classes': ('collapse',)
+        }),
+        ('Tarihler', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def stock_status(self, obj):
+        if obj.stock == 0:
+            return format_html('<span style="color: red; font-weight: bold;">Tükendi</span>')
+        elif obj.stock < 10:
+            return format_html('<span style="color: orange; font-weight: bold;">Az Kaldı ({})</span>', obj.stock)
+        else:
+            return format_html('<span style="color: green;">Stokta ({})</span>', obj.stock)
+    stock_status.short_description = 'Stok Durumu'
+    
+    def avg_rating(self, obj):
+        reviews = obj.reviews.filter(is_approved=True)
+        if not reviews.exists():
+            return "Yorum Yok"
+        avg = sum(r.rating for r in reviews) / reviews.count()
+        stars = '⭐' * int(avg)
+        return format_html(
+            '<span style="color: #ffc107; font-weight: bold;">{} ({:.1f})</span>',
+            stars, avg
+        )
+    avg_rating.short_description = 'Ort. Puan'
+    
+    def review_count(self, obj):
+        count = obj.reviews.filter(is_approved=True).count()
+        return format_html(
+            '<span style="background-color: #e9ecef; padding: 3px 8px; border-radius: 3px;">{} Yorum</span>',
+            count
+        )
+    review_count.short_description = 'Yorum Sayı'
 

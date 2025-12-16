@@ -1,190 +1,219 @@
 {% extends 'base.html' %}
 
+{% block title %}{{ product.name }} - Kayabaşı Naturel{% endblock %}
+
 {% block content %}
-  <div class="container py-4">
+<div class="container" style="margin-top: 80px; margin-bottom: 80px;">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'store:index' %}">Ana Sayfa</a></li>
-        {% if product.category %}
-          <li class="breadcrumb-item">
-            <a href="{% url 'store:category_products' 'ari' %}">{{ product.category.name }}</a>
-          </li>
-        {% endif %}
-        <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
-      </ol>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'store:index' %}">Ana Sayfa</a></li>
+            {% if product.category %}
+                <li class="breadcrumb-item">{{ product.category.name }}</li>
+            {% endif %}
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
     </nav>
 
-    <div class="row g-5">
-      <!-- Ürün Görseli -->
-      <div class="col-lg-6">
-        <div class="card shadow-sm border-0">
-          {% if product.image %}
-            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="border-radius: 8px;">
-          {% else %}
-            <img src="https://placehold.co/800x600?text=Ürün+Görseli" class="card-img-top" alt="{{ product.name }}" style="border-radius: 8px;">
-          {% endif %}
+    <div class="row g-4">
+        <!-- Ürün Galerisi -->
+        <div class="col-lg-6">
+            <!-- Ana Resim -->
+            <div class="card shadow-sm border-0 mb-3">
+                <img id="mainImage" src="{% if product.image %}{{ product.image.url }}{% else %}https://placehold.co/600x600?text=Ürün+Görseli{% endif %}" 
+                     class="card-img-top" alt="{{ product.name }}" style="border-radius: 8px; object-fit: cover; height: 500px;">
+            </div>
+
+            <!-- Küçük Resimler (Galeri) -->
+            {% if product.images.all %}
+                <div class="row g-2">
+                    <!-- Ana ürün resmi thumbnail -->
+                    <div class="col-3">
+                        <img src="{% if product.image %}{{ product.image.url }}{% else %}https://placehold.co/100x100{% endif %}" 
+                             alt="{{ product.name }}" class="img-thumbnail cursor-pointer" 
+                             onclick="document.getElementById('mainImage').src=this.src;"
+                             style="cursor: pointer; border: 2px solid #28a745;">
+                    </div>
+                    <!-- Ek resimler -->
+                    {% for img in product.images.all %}
+                        <div class="col-3">
+                            <img src="{{ img.image.url }}" alt="{{ img.alt_text }}" 
+                                 class="img-thumbnail cursor-pointer" 
+                                 onclick="document.getElementById('mainImage').src=this.src;"
+                                 style="cursor: pointer;">
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
-        
-        <!-- Ürün Özellikleri -->
-        <div class="card mt-4 border-0 bg-light">
-          <div class="card-body">
-            <h5 class="card-title mb-3"><i class="fas fa-info-circle"></i> Ürün Özellikleri</h5>
-            <ul class="list-unstyled mb-0">
-              <li class="mb-2"><strong>Kategori:</strong> {{ product.category.name|default:"Genel" }}</li>
-              <li class="mb-2"><strong>Stok Durumu:</strong> 
-                {% if product.stock > 10 %}
-                  <span class="badge bg-success">Stokta Var</span>
-                {% elif product.stock > 0 %}
-                  <span class="badge bg-warning text-dark">Son {{ product.stock }} Ürün</span>
+
+        <!-- Ürün Bilgileri -->
+        <div class="col-lg-6">
+            <!-- Başlık -->
+            <h1 class="mb-3">{{ product.name }}</h1>
+            
+            <!-- Rating -->
+            {% if avg_rating %}
+                <div class="mb-3">
+                    <div style="color: #ffc107; font-size: 18px;">
+                        {% for i in "12345" %}
+                            {% if i|add:0 <= avg_rating|floatformat:0 %}⭐{% else %}☆{% endif %}
+                        {% endfor %}
+                    </div>
+                    <small class="text-success">Ort. {{ avg_rating|floatformat:1 }}/5 ({{ review_count }} yorum)</small>
+                </div>
+            {% else %}
+                <p class="text-muted mb-3">Henüz yorum yok</p>
+            {% endif %}
+
+            <!-- Fiyat -->
+            <h3 class="text-success fw-bold mb-3">{{ product.price|floatformat:2 }} TL</h3>
+
+            <!-- Stok -->
+            <div class="mb-4">
+                {% if product.stock > 0 %}
+                    {% if product.stock < 10 %}
+                        <div class="alert alert-warning mb-0">
+                            <strong>⚠️ Son {{ product.stock }} ürün kaldı!</strong>
+                        </div>
+                    {% else %}
+                        <span class="badge bg-success">✓ Stokta Var</span>
+                    {% endif %}
                 {% else %}
-                  <span class="badge bg-danger">Stokta Yok</span>
+                    <div class="alert alert-danger mb-0">
+                        <strong>Maalesef Stokta Yok</strong>
+                    </div>
                 {% endif %}
-              </li>
-              {% if product.weight %}
-                <li class="mb-2"><strong>Net Ağırlık:</strong> {{ product.weight }}</li>
-              {% endif %}
-              {% if product.production_location %}
-                <li class="mb-2"><strong>Üretim Yeri:</strong> {{ product.production_location }}</li>
-              {% endif %}
-              {% if product.shelf_life %}
-                <li class="mb-2"><strong>Raf Ömrü:</strong> {{ product.shelf_life }}</li>
-              {% endif %}
-            </ul>
-          </div>
-        </div>
-      </div>
+            </div>
 
-      <!-- Ürün Bilgileri ve Satın Alma -->
-      <div class="col-lg-6">
-        <!-- Ürün Başlığı ve Fiyat -->
-        <div class="mb-4">
-          {% if product.category %}
-            <span class="badge bg-success mb-2">{{ product.category.name }}</span>
-          {% endif %}
-          <h1 class="display-5 mb-3">{{ product.name }}</h1>
-          <div class="d-flex align-items-center mb-3">
-            <span class="display-4 text-success fw-bold">{{ product.price }} TL</span>
-            <span class="text-muted ms-2">/ adet</span>
-          </div>
-        </div>
+            <!-- Sepete Ekle -->
+            <div class="mb-4">
+                {% if product.stock > 0 %}
+                    <form method="POST" action="{% url 'store:add_to_cart' product.slug %}">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="max-width: 100px;">
+                            <button class="btn btn-success btn-lg" type="submit">
+                                <i class="fas fa-shopping-cart"></i> Sepete Ekle
+                            </button>
+                        </div>
+                    </form>
+                {% else %}
+                    <button class="btn btn-secondary btn-lg w-100" disabled>Stokta Yok</button>
+                {% endif %}
+            </div>
 
-        <!-- Ürün Açıklaması -->
-        <div class="mb-4">
-          <h5 class="mb-3">Ürün Açıklaması</h5>
-          <p class="text-muted lh-lg">{{ product.description }}</p>
-        </div>
-
-        <!-- Öne Çıkan Özellikler -->
-        <div class="mb-4">
-          <h5 class="mb-3">Öne Çıkan Özellikler</h5>
-          <ul class="list-unstyled">
-            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> %100 Doğal ve Organik</li>
-            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Katkısız ve İşlenmemiş</li>
-            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Üretici Garantili</li>
-            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> İzlenebilir Üretim</li>
-            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Hızlı Kargo ile Teslim</li>
-          </ul>
-        </div>
-
-        <!-- Sepete Ekleme Formu -->
-        <div class="card border-success mb-4">
-          <div class="card-body">
-            <form method="post" action="{% url 'store:add_to_cart' product.slug %}">
-              {% csrf_token %}
-              <div class="row g-3 align-items-end">
-                <div class="col-md-4">
-                  <label for="qty" class="form-label fw-bold">Adet Seçin</label>
-                  <input id="qty" name="quantity" type="number" min="1" max="{{ product.stock }}" value="1" class="form-control form-control-lg">
+            <!-- Özellikleri -->
+            <div class="card border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="card-title mb-3"><strong>📋 Ürün Özellikleri</strong></h6>
+                    <dl class="row mb-0">
+                        {% if product.weight %}
+                            <dt class="col-sm-4">Net Ağırlık:</dt>
+                            <dd class="col-sm-8">{{ product.weight }}</dd>
+                        {% endif %}
+                        {% if product.production_location %}
+                            <dt class="col-sm-4">Üretim Yeri:</dt>
+                            <dd class="col-sm-8">{{ product.production_location }}</dd>
+                        {% endif %}
+                        {% if product.shelf_life %}
+                            <dt class="col-sm-4">Raf Ömrü:</dt>
+                            <dd class="col-sm-8">{{ product.shelf_life }}</dd>
+                        {% endif %}
+                    </dl>
                 </div>
-                <div class="col-md-8">
-                  <button type="submit" class="btn btn-success btn-lg w-100" {% if product.stock == 0 %}disabled{% endif %}>
-                    <i class="fas fa-shopping-cart me-2"></i>Sepete Ekle
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
+            </div>
         </div>
-
-        <!-- Ek Bilgiler -->
-        <div class="alert alert-info border-0">
-          <h6 class="alert-heading"><i class="fas fa-truck me-2"></i>Teslimat Bilgisi</h6>
-          <p class="mb-0 small">Siparişiniz özenle paketlenir ve 2-3 iş günü içerisinde kargoya verilir.</p>
-        </div>
-
-        <div class="d-flex gap-2">
-          <a href="{% url 'store:view_cart' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-shopping-basket me-2"></i>Sepeti Görüntüle
-          </a>
-          <a href="javascript:history.back()" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Geri Dön
-          </a>
-        </div>
-      </div>
     </div>
 
-    <!-- Üretim Süreci ve Detaylı Bilgiler -->
+    <!-- Detaylı Bilgiler -->
     <div class="row mt-5">
-      <div class="col-12">
-        <div class="card border-0 shadow-sm">
-          <div class="card-body p-4">
-            <h4 class="mb-4">Ürün Hakkında Detaylı Bilgi</h4>
-            
-            <!-- Üretim Süreci -->
-            {% if product.production_process %}
-            <div class="mb-4">
-              <h5 class="text-success mb-3">🏭 Üretim Süreci</h5>
-              <p class="text-muted">{{ product.production_process|linebreaks }}</p>
-            </div>
+        <div class="col-lg-8">
+            {% if product.description %}
+                <h3 class="mb-3">📝 Açıklama</h3>
+                <p>{{ product.description|linebreaks }}</p>
             {% endif %}
-            
-            <!-- İçerik Bilgisi -->
+
             {% if product.ingredients %}
-            <div class="mb-4">
-              <h5 class="text-success mb-3">📋 İçerik Bilgisi</h5>
-              <p class="text-muted">{{ product.ingredients|linebreaks }}</p>
-            </div>
+                <h4 class="mt-4 mb-3">🥄 İçerik Bilgisi</h4>
+                <p>{{ product.ingredients|linebreaks }}</p>
             {% endif %}
-            
-            <!-- Saklama Koşulları -->
+
+            {% if product.production_process %}
+                <h4 class="mt-4 mb-3">⚙️ Üretim Süreci</h4>
+                <p>{{ product.production_process|linebreaks }}</p>
+            {% endif %}
+
             {% if product.storage_conditions %}
-            <div class="mb-4">
-              <h5 class="text-success mb-3">🌡️ Saklama Koşulları</h5>
-              <p class="text-muted">{{ product.storage_conditions|linebreaks }}</p>
-            </div>
+                <h4 class="mt-4 mb-3">🧊 Saklama Koşulları</h4>
+                <p>{{ product.storage_conditions|linebreaks }}</p>
             {% endif %}
-            
-            <!-- Sertifikalar -->
-            {% if product.certificates %}
-            <div class="mb-4">
-              <h5 class="text-success mb-3">🏆 Sertifikalar ve Belgeler</h5>
-              <p class="text-muted">{{ product.certificates|linebreaks }}</p>
-            </div>
-            {% endif %}
-            
-            <!-- Genel Bilgiler -->
-            <div class="row mt-4">
-              <div class="col-md-6 mb-3">
-                <h6 class="text-success">🌱 Doğal Üretim</h6>
-                <p class="text-muted small">Kayabaşı Naturel ürünleri, hiçbir kimyasal katkı maddesi kullanılmadan, geleneksel yöntemlerle üretilir. Ürünlerimiz tamamen doğal ve katkısızdır.</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                <h6 class="text-success">📍 İzlenebilir Kaynak</h6>
-                <p class="text-muted small">Her ürünümüzün kaynağı bellidir. Muğla, Milas bölgesindeki üretim yerlerimizden gelen ürünlerimizin üretim süreci tamamen şeffaftır.</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                <h6 class="text-success">✓ Kalite Garantisi</h6>
-                <p class="text-muted small">25 yıllık üretim tecrübesi ile kalite standartlarımızdan ödün vermeden, her ürünü titizlikle kontrol ediyoruz.</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                <h6 class="text-success">🚚 Güvenli Teslimat</h6>
-                <p class="text-muted small">Ürünleriniz özel ambalajlarda, en kısa sürede ve en güvenli şekilde adresinize teslim edilir.</p>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
+
+    <!-- Yorumlar Bölümü -->
+    <div class="row mt-5">
+        <div class="col-lg-8">
+            <h3 class="mb-4">⭐ Müşteri Yorumları</h3>
+
+            {% if reviews %}
+                {% for review in reviews %}
+                    <div class="card mb-3 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="mb-1">{{ review.user.get_full_name|default:review.user.username }}</h6>
+                                    <small class="text-warning">
+                                        {% for i in "12345" %}
+                                            {% if i|add:0 <= review.rating %}⭐{% else %}☆{% endif %}
+                                        {% endfor %}
+                                    </small>
+                                </div>
+                                <small class="text-muted">{{ review.created_at|date:"d.m.Y" }}</small>
+                            </div>
+                            <h6 class="mb-2">{{ review.title }}</h6>
+                            <p class="mb-0">{{ review.comment }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">
+                    Henüz bu ürün için yorum yapılmamış.
+                </div>
+            {% endif %}
+
+            <!-- Yorum Formu -->
+            {% if user.is_authenticated %}
+                <h4 class="mt-4 mb-3">Yorum Yap</h4>
+                <form method="post" class="card border-0 bg-light p-3">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Puan</label>
+                        <select name="rating" class="form-select" required>
+                            <option value="">Puan Seçin</option>
+                            <option value="5">⭐⭐⭐⭐⭐ 5 Yıldız</option>
+                            <option value="4">⭐⭐⭐⭐ 4 Yıldız</option>
+                            <option value="3">⭐⭐⭐ 3 Yıldız</option>
+                            <option value="2">⭐⭐ 2 Yıldız</option>
+                            <option value="1">⭐ 1 Yıldız</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Başlık</label>
+                        <input type="text" name="title" class="form-control" placeholder="Yorum başlığı" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Yorum</label>
+                        <textarea name="comment" class="form-control" rows="4" placeholder="Detaylı yorum yapın..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Yorumu Yayınla</button>
+                </form>
+            {% else %}
+                <div class="alert alert-warning">
+                    Yorum yapmak için <a href="{% url 'store:login' %}">giriş yap</a>.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

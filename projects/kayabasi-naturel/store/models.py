@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+from django.contrib.auth.models import User
 
 
 class Category(models.Model):
@@ -95,4 +96,53 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product}"
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE, verbose_name="Ürün")
+    image = models.ImageField(upload_to='products/gallery/', verbose_name="Resim")
+    alt_text = models.CharField(max_length=200, blank=True, verbose_name="Alt Metin")
+    is_main = models.BooleanField(default=False, verbose_name="Ana Resim")
+    order = models.PositiveIntegerField(default=0, verbose_name="Sıra")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = "Ürün Resmi"
+        verbose_name_plural = "Ürün Resimleri"
+
+    def __str__(self):
+        return f"{self.product.name} - Resim {self.order}"
+
+
+class Review(models.Model):
+    RATING_CHOICES = [
+        (5, '⭐⭐⭐⭐⭐ 5 Yıldız'),
+        (4, '⭐⭐⭐⭐ 4 Yıldız'),
+        (3, '⭐⭐⭐ 3 Yıldız'),
+        (2, '⭐⭐ 2 Yıldız'),
+        (1, '⭐ 1 Yıldız'),
+    ]
+
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE, verbose_name="Ürün")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Kullanıcı")
+    rating = models.IntegerField(choices=RATING_CHOICES, verbose_name="Puan")
+    title = models.CharField(max_length=200, verbose_name="Başlık")
+    comment = models.TextField(verbose_name="Yorum")
+    is_approved = models.BooleanField(default=True, verbose_name="Onaylı")
+    helpful_count = models.PositiveIntegerField(default=0, verbose_name="Faydalı Say")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Oluşturulma Tarihi")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Güncellenme Tarihi")
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('product', 'user')
+        verbose_name = "Yorum"
+        verbose_name_plural = "Yorumlar"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name} ({self.rating}⭐)"
+
+    def get_rating_display_star(self):
+        return '⭐' * self.rating
 

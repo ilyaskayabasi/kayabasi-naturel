@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import models
 import stripe
 
 # stripe.error may not be importable in some environments; fall back so tests can run
@@ -48,7 +49,47 @@ def category_products(request, category_type):
 
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug)
-    return render(request, 'store/detail.html', {'product': product})
+    
+    # Gözüken (onaylı) yorumlar
+    reviews = product.reviews.filter(is_approved=True).order_by('-created_at')
+    
+    # Ortalama rating hesapla
+    if reviews.exists():
+        avg_rating = sum(r.rating for r in reviews) / reviews.count()
+    else:
+        avg_rating = None
+    
+    # Yorum ekleme (POST)
+    if request.method == 'POST' and request.user.is_authenticated:
+        # Aynı ürüne zaten yorum yaptı mı kontrolü
+        if product.reviews.filter(user=request.user).exists():
+            messages.error(request, 'Bu ürüne zaten yorum yaptınız.')
+        else:
+            rating = request.POST.get('rating')
+            title = request.POST.get('title')
+            comment = request.POST.get('comment')
+            
+            if rating and title and comment:
+                Review.objects.create(
+                    product=product,
+                    user=request.user,
+                    rating=int(rating),
+                    title=title,
+                    comment=comment,
+                    is_approved=True  # Otomatik onay (admin kontrol etebilir)
+                )
+                messages.success(request, 'Yorumunuz başarıyla eklendi!')
+                return redirect('store:product_detail', slug=slug)
+            else:
+                messages.error(request, 'Lütfen tüm alanları doldurun.')
+    
+    context = {
+        'product': product,
+        'reviews': reviews,
+        'avg_rating': avg_rating,
+        'review_count': reviews.count(),
+    }
+    return render(request, 'store/detail.html', context)
 
 
 def about(request):
@@ -296,3 +337,24 @@ def order_history(request):
         'orders': orders,
     }
     return render(request, 'store/order_history.html', context)
+
+
+# Arama (Search)
+def search_products(request):
+    query = request.GET.get('q', '').strip()
+    products = Product.objects.none()
+    
+    if query:
+        products = Product.objects.filter(
+            models.Q(name__icontains=query) |
+            models.Q(description__icontains=query) |
+            models.Q(ingredients__icontains=query) |
+            models.Q(category__name__icontains=query)
+        ).distinct()
+    
+    context = {
+        'query': query,
+        'products': products,
+        'product_count': products.count(),
+    }
+    return render(request, 'store/search_results.html', context)

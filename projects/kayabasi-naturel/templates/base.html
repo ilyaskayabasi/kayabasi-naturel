@@ -18,6 +18,16 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNav">
+          <!-- Arama Formu -->
+          <form class="d-flex me-auto ms-lg-3" method="GET" action="{% url 'store:search_products' %}">
+            <div class="input-group input-group-sm">
+              <input class="form-control" type="search" name="q" placeholder="Ürün ara..." value="{{ request.GET.q }}">
+              <button class="btn btn-light" type="submit">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </form>
+
           <ul class="navbar-nav ms-auto align-items-center">
             <li class="nav-item me-3"><a class="nav-link text-white" href="/">Ana Sayfa</a></li>
             <li class="nav-item me-3"><a class="nav-link text-white" href="{% url 'store:about' %}">Hakkımızda</a></li>

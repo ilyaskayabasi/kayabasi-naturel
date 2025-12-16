@@ -19,4 +19,6 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     # User URLs
     path('orders/', views.order_history, name='order_history'),
+    # Search
+    path('search/', views.search_products, name='search_products'),
 ]

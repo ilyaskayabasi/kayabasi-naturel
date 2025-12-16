@@ -282,6 +282,6 @@ def register_view(request):
         )
         
         messages.success(request, 'Kayıt başarılı! Giriş yapabilirsiniz.')
-        return redirect('auth:login')
+        return redirect('store:login')
     
     return render(request, 'auth/register.html')

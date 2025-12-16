@@ -91,11 +91,25 @@
                 {% if product.stock > 0 %}
                     <form method="POST" action="{% url 'store:add_to_cart' product.slug %}">
                         {% csrf_token %}
-                        <div class="input-group mb-3">
-                            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="max-width: 100px;">
-                            <button class="btn btn-success btn-lg" type="submit">
-                                <i class="fas fa-shopping-cart"></i> Sepete Ekle
-                            </button>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Miktar</label>
+                                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Ölçü Birimi</label>
+                                <select name="unit" class="form-select" required>
+                                    <option value="">Seçin</option>
+                                    {% for unit_value, unit_label in product.UNIT_CHOICES %}
+                                        <option value="{{ unit_value }}" {% if product.unit == unit_value %}selected{% endif %}>{{ unit_label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button class="btn btn-success w-100" type="submit">
+                                    <i class="fas fa-shopping-cart"></i> Sepete Ekle
+                                </button>
+                            </div>
                         </div>
                     </form>
                 {% else %}

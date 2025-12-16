@@ -100,8 +100,10 @@ def add_to_cart(request, slug):
     product = get_object_or_404(Product, slug=slug)
     cart = request.session.get('cart', {})
     qty = int(request.POST.get('quantity', 1)) if request.method == 'POST' else 1
-    item = cart.get(slug, {'quantity': 0, 'price': str(product.price), 'name': product.name})
+    unit = request.POST.get('unit', product.unit) if request.method == 'POST' else product.unit
+    item = cart.get(slug, {'quantity': 0, 'price': str(product.price), 'name': product.name, 'unit': unit})
     item['quantity'] = item.get('quantity', 0) + qty
+    item['unit'] = unit
     cart[slug] = item
     request.session['cart'] = cart
     return redirect('store:index')

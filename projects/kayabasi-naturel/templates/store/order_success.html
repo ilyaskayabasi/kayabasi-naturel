@@ -1,14 +1,135 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Teşekkürler!</h1>
-  {% if order %}
-    <p>Sipariş numaranız: {{ order.id }}</p>
-    <p>İsim: {{ order.full_name }}</p>
-    <p>Email: {{ order.email }}</p>
-    <p>Adres: {{ order.address }}</p>
-  {% else %}
-    <p>Sipariş bilgisi bulunamadı.</p>
-  {% endif %}
-  <p><a class="btn btn-primary" href="/">Ana sayfaya dön</a></p>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      {% if order %}
+      <!-- Başarı Mesajı -->
+      <div class="text-center mb-5">
+        <div class="mb-4">
+          <i class="fas fa-check-circle text-success" style="font-size: 80px;"></i>
+        </div>
+        <h1 class="display-4 mb-3">Siparişiniz Alındı!</h1>
+        <p class="lead text-muted">Siparişiniz için teşekkür ederiz. En kısa sürede hazırlayıp kargoya vereceğiz.</p>
+      </div>
+
+      <!-- Sipariş Detayları -->
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+          <h4 class="mb-4">Sipariş Bilgileri</h4>
+          
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <p class="text-muted mb-1">Sipariş Numarası</p>
+              <p class="fw-bold mb-0">#{{ order.id }}</p>
+            </div>
+            <div class="col-md-4">
+              <p class="text-muted mb-1">Sipariş Tarihi</p>
+              <p class="fw-bold mb-0">{{ order.created_at|date:"d.m.Y H:i" }}</p>
+            </div>
+            <div class="col-md-4">
+              <p class="text-muted mb-1">Ödeme Durumu</p>
+              <p class="mb-0">
+                {% if order.paid %}
+                  <span class="badge bg-success">Ödendi</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">Bekliyor</span>
+                {% endif %}
+              </p>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <h5 class="mb-3">Teslimat Bilgileri</h5>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <p class="text-muted mb-1">Ad Soyad</p>
+              <p class="mb-0">{{ order.full_name }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <p class="text-muted mb-1">Telefon</p>
+              <p class="mb-0">{{ order.phone }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <p class="text-muted mb-1">E-posta</p>
+              <p class="mb-0">{{ order.email }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <p class="text-muted mb-1">Şehir</p>
+              <p class="mb-0">{{ order.city }} / {{ order.district }}</p>
+            </div>
+            <div class="col-12">
+              <p class="text-muted mb-1">Adres</p>
+              <p class="mb-0">{{ order.address }}</p>
+              {% if order.postal_code %}
+                <p class="text-muted small mb-0">Posta Kodu: {{ order.postal_code }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if order.order_notes %}
+          <hr class="my-4">
+          <h5 class="mb-3">Sipariş Notu</h5>
+          <p class="text-muted">{{ order.order_notes }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Sipariş İçeriği -->
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+          <h4 class="mb-4">Sipariş İçeriği</h4>
+          
+          {% for item in order.items.all %}
+          <div class="d-flex justify-content-between align-items-center mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+            <div>
+              <h6 class="mb-1">{{ item.product.name }}</h6>
+              <p class="text-muted small mb-0">{{ item.quantity }} adet × {{ item.price }} TL</p>
+            </div>
+            <div>
+              <p class="mb-0 fw-bold">{{ item.price|floatformat:2 }} TL</p>
+            </div>
+          </div>
+          {% endfor %}
+
+          <div class="border-top pt-3 mt-3">
+            <div class="d-flex justify-content-between">
+              <h5 class="mb-0">Toplam</h5>
+              <h5 class="mb-0 text-success">{{ order.get_total }} TL</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bilgilendirme -->
+      <div class="alert alert-info border-0">
+        <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Sonraki Adımlar</h6>
+        <ul class="mb-0">
+          <li>E-posta adresinize sipariş onay maili gönderilecektir.</li>
+          <li>Siparişiniz 2-3 iş günü içerisinde kargoya verilecektir.</li>
+          <li>Kargo takip numaranız e-posta ile tarafınıza iletilecektir.</li>
+        </ul>
+      </div>
+
+      <!-- Aksiyonlar -->
+      <div class="text-center mt-4">
+        <a href="{% url 'store:index' %}" class="btn btn-success btn-lg px-5">
+          <i class="fas fa-home me-2"></i>Ana Sayfaya Dön
+        </a>
+      </div>
+
+      {% else %}
+      <!-- Sipariş Bulunamadı -->
+      <div class="text-center py-5">
+        <i class="fas fa-exclamation-triangle text-warning mb-4" style="font-size: 60px;"></i>
+        <h2 class="mb-3">Sipariş Bilgisi Bulunamadı</h2>
+        <p class="text-muted mb-4">Sipariş bilgilerine ulaşılamadı. Lütfen daha sonra tekrar deneyin.</p>
+        <a href="{% url 'store:index' %}" class="btn btn-primary">Ana Sayfaya Dön</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
 {% endblock %}

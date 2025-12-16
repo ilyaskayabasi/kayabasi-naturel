@@ -87,8 +87,24 @@ def checkout(request):
         # create order
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
+        phone = request.POST.get('phone', '')
         address = request.POST.get('address')
-        order = Order.objects.create(full_name=full_name, email=email, address=address)
+        city = request.POST.get('city', '')
+        district = request.POST.get('district', '')
+        postal_code = request.POST.get('postal_code', '')
+        order_notes = request.POST.get('order_notes', '')
+        
+        order = Order.objects.create(
+            full_name=full_name, 
+            email=email, 
+            phone=phone,
+            address=address,
+            city=city,
+            district=district,
+            postal_code=postal_code,
+            order_notes=order_notes
+        )
+        
         total_amount = 0
         for slug, data in cart.items():
             try:
@@ -99,33 +115,57 @@ def checkout(request):
             OrderItem.objects.create(order=order, product=product, price=product.price, quantity=qty)
             total_amount += float(product.price) * qty
 
-        # create Stripe PaymentIntent
-        intent = stripe.PaymentIntent.create(
-            amount=int(total_amount * 100),
-            currency='try',
-            metadata={'order_id': order.id}
-        )
-        order.stripe_payment_intent = intent.get('id')
-        order.save()
-
+        # create Stripe PaymentIntent (only if API keys are configured)
+        if settings.STRIPE_SECRET_KEY:
+            try:
+                intent = stripe.PaymentIntent.create(
+                    amount=int(total_amount * 100),
+                    currency='try',
+                    metadata={'order_id': order.id}
+                )
+                order.stripe_payment_intent = intent.get('id')
+                order.save()
+            except Exception as e:
+                # Stripe hatası olsa bile siparişi kaydet
+                pass
+        
         # store order id in session for success page
         request.session['last_order_id'] = order.id
-        # redirect to a simple success page (in real app confirm via webhook)
+        # clear cart
+        request.session['cart'] = {}
+        # redirect to success page
         return redirect('store:order_success')
 
     # GET -> show checkout form
     cart = request.session.get('cart', {})
     items = []
     total = 0
+    kargo = 0  # Kargo ücreti - gerekirse eklenebilir
+    
     for slug, data in cart.items():
         try:
             product = Product.objects.get(slug=slug)
         except Product.DoesNotExist:
             continue
         qty = data.get('quantity', 0)
-        items.append({'product': product, 'quantity': qty, 'total': product.price * qty})
-        total += product.price * qty
-    return render(request, 'store/checkout.html', {'items': items, 'total': total, 'stripe_pub': settings.STRIPE_PUBLISHABLE_KEY})
+        subtotal = product.price * qty
+        items.append({
+            'product': product, 
+            'quantity': qty, 
+            'subtotal': subtotal
+        })
+        total += subtotal
+    
+    genel_toplam = total + kargo
+    
+    context = {
+        'items': items,
+        'total': total,
+        'kargo': kargo,
+        'genel_toplam': genel_toplam,
+        'stripe_pub': settings.STRIPE_PUBLISHABLE_KEY
+    }
+    return render(request, 'store/checkout.html', context)
 
 
 def order_success(request):

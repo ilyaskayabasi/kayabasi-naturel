@@ -20,7 +20,7 @@
         <div class="collapse navbar-collapse" id="mainNav">
           <ul class="navbar-nav ms-auto align-items-center">
             <li class="nav-item me-3"><a class="nav-link text-white" href="/">Ana Sayfa</a></li>
-            <li class="nav-item me-3"><a class="nav-link text-white" href="#">Hakkımızda</a></li>
+            <li class="nav-item me-3"><a class="nav-link text-white" href="{% url 'store:about' %}">Hakkımızda</a></li>
             <li class="nav-item me-3"><a class="nav-link text-white" href="{% url 'store:view_cart' %}">Sepet (<span id="cart-count">{{ cart_count|default:0 }}</span>)</a></li>
             <li class="nav-item"><a class="btn btn-outline-light btn-sm" href="/login">Giriş / Kayıt</a></li>
           </ul>
@@ -34,7 +34,7 @@
 
     <footer class="bg-light mt-5 py-4">
       <div class="container text-muted small">
-        &copy; {{ now.year }} Kayabaşı Naturel — Zeytin, zeytinyağı ve arı ürünleri
+        © {{ now.year }} Kayabaşı Naturel - Zeytin, zeytinyağı ve arı ürünleri
       </div>
     </footer>
 

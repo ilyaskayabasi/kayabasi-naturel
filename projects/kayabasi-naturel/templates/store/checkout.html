@@ -1,30 +1,152 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1 class="mb-4">Ödeme</h1>
-  <form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label class="form-label">İsim Soyisim</label>
-      <input name="full_name" class="form-control" required>
+<div class="container py-5">
+  <div class="row">
+    <div class="col-12 mb-4">
+      <h2><i class="fas fa-shopping-bag me-2"></i>Ödeme ve Teslimat</h2>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'store:index' %}">Ana Sayfa</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'store:view_cart' %}">Sepet</a></li>
+          <li class="breadcrumb-item active">Ödeme</li>
+        </ol>
+      </nav>
     </div>
-    <div class="mb-3">
-      <label class="form-label">Email</label>
-      <input name="email" type="email" class="form-control" required>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Adres</label>
-      <textarea name="address" class="form-control" required></textarea>
+  </div>
+
+  <div class="row">
+    <!-- Sipariş Formu -->
+    <div class="col-lg-7 mb-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h4 class="mb-4">Teslimat Bilgileri</h4>
+          <form method="post" id="checkoutForm">
+            {% csrf_token %}
+            
+            <!-- İletişim Bilgileri -->
+            <div class="mb-4">
+              <h6 class="text-success mb-3">İletişim Bilgileri</h6>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Ad Soyad <span class="text-danger">*</span></label>
+                  <input name="full_name" type="text" class="form-control form-control-lg" placeholder="Adınız ve soyadınız" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Telefon <span class="text-danger">*</span></label>
+                  <input name="phone" type="tel" class="form-control form-control-lg" placeholder="0555 555 55 55" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-bold">E-posta <span class="text-danger">*</span></label>
+                  <input name="email" type="email" class="form-control form-control-lg" placeholder="ornek@email.com" required>
+                </div>
+              </div>
+            </div>
+
+            <!-- Adres Bilgileri -->
+            <div class="mb-4">
+              <h6 class="text-success mb-3">Teslimat Adresi</h6>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">İl <span class="text-danger">*</span></label>
+                  <input name="city" type="text" class="form-control form-control-lg" placeholder="Ankara" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">İlçe <span class="text-danger">*</span></label>
+                  <input name="district" type="text" class="form-control form-control-lg" placeholder="Çankaya" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-bold">Adres <span class="text-danger">*</span></label>
+                  <textarea name="address" class="form-control" rows="3" placeholder="Sokak, mahalle, bina no, daire no" required></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Posta Kodu</label>
+                  <input name="postal_code" type="text" class="form-control form-control-lg" placeholder="06100">
+                </div>
+              </div>
+            </div>
+
+            <!-- Sipariş Notu -->
+            <div class="mb-4">
+              <h6 class="text-success mb-3">Sipariş Notu (Opsiyonel)</h6>
+              <textarea name="order_notes" class="form-control" rows="3" placeholder="Siparişiniz hakkında eklemek istediğiniz notlar (örn: teslimat tercihleri)"></textarea>
+            </div>
+
+            <!-- Ödeme Yöntemi Bilgisi -->
+            <div class="alert alert-info border-0">
+              <h6 class="alert-heading"><i class="fas fa-credit-card me-2"></i>Ödeme Yöntemi</h6>
+              <p class="mb-0 small">Siparişinizi tamamladıktan sonra ödeme sayfasına yönlendirileceksiniz. Güvenli ödeme altyapımız ile kredi kartı veya banka kartı ile ödeme yapabilirsiniz.</p>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-between mt-4">
+              <a href="{% url 'store:view_cart' %}" class="btn btn-outline-secondary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Sepete Dön
+              </a>
+              <button type="submit" class="btn btn-success btn-lg px-5">
+                Siparişi Tamamla <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
-    <h3>Sepet</h3>
-    <ul>
-      {% for it in items %}
-        <li>{{ it.product.name }} — {{ it.quantity }} adet — {{ it.total }} TL</li>
-      {% endfor %}
-    </ul>
-    <p class="fw-bold">Toplam: {{ total }} TL</p>
-    <button class="btn btn-success" type="submit">Siparişi Oluştur ve Ödeme</button>
-    <a class="btn btn-secondary ms-2" href="{% url 'store:view_cart' %}">Sepete geri dön</a>
-  </form>
+    <!-- Sipariş Özeti -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
+        <div class="card-body p-4">
+          <h4 class="mb-4">Sipariş Özeti</h4>
+          
+          <!-- Ürünler -->
+          <div class="mb-3">
+            {% for item in items %}
+            <div class="d-flex align-items-start mb-3 pb-3 border-bottom">
+              <div class="flex-shrink-0">
+                {% if item.product.image %}
+                  <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                {% else %}
+                  <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="fas fa-image text-muted"></i>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h6 class="mb-1">{{ item.product.name }}</h6>
+                <p class="text-muted small mb-1">{{ item.quantity }} adet × {{ item.product.price }} TL</p>
+                <p class="mb-0 fw-bold text-success">{{ item.subtotal }} TL</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Fiyat Özeti -->
+          <div class="border-top pt-3">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Ara Toplam</span>
+              <span class="fw-bold">{{ total }} TL</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Kargo</span>
+              <span class="fw-bold">{% if kargo > 0 %}{{ kargo }} TL{% else %}Ücretsiz{% endif %}</span>
+            </div>
+            <div class="d-flex justify-content-between pt-3 border-top">
+              <span class="h5 mb-0">Toplam</span>
+              <span class="h5 mb-0 text-success">{{ genel_toplam }} TL</span>
+            </div>
+          </div>
+
+          <!-- Güvenlik Rozetleri -->
+          <div class="mt-4 pt-3 border-top text-center">
+            <p class="text-muted small mb-2">
+              <i class="fas fa-lock me-1"></i>Güvenli Ödeme
+            </p>
+            <p class="text-muted small mb-0">
+              <i class="fas fa-shield-alt me-1"></i>256-bit SSL Şifreleme
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

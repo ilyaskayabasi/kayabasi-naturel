@@ -17,15 +17,29 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def index(request):
-    # Kategorilere göre ürünleri grupla
-    bee_products = Product.objects.filter(category__name__icontains='arı').order_by('name')
-    olive_products = Product.objects.filter(category__name__icontains='zeytin').order_by('name')
+    return render(request, 'store/index.html')
+
+
+def category_products(request, category_type):
+    if category_type == 'ari':
+        products = Product.objects.filter(category__name__icontains='arı').order_by('name')
+        category_name = 'Arı Ürünleri'
+        category_icon = '🐝'
+    elif category_type == 'zeytin':
+        products = Product.objects.filter(category__name__icontains='zeytin').order_by('name')
+        category_name = 'Zeytin Ürünleri'
+        category_icon = '🫒'
+    else:
+        products = Product.objects.none()
+        category_name = 'Ürünler'
+        category_icon = '📦'
     
     context = {
-        'bee_products': bee_products,
-        'olive_products': olive_products,
+        'products': products,
+        'category_name': category_name,
+        'category_icon': category_icon,
     }
-    return render(request, 'store/index.html', context)
+    return render(request, 'store/category.html', context)
 
 
 def product_detail(request, slug):

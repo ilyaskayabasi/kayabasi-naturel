@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="mb-4">
+    <a href="{% url 'store:index' %}" class="btn btn-outline-secondary">← Ana Sayfaya Dön</a>
+  </div>
+
+  <div class="d-flex align-items-center mb-5">
+    <div class="display-3 me-3">{{ category_icon }}</div>
+    <div>
+      <h1 class="mb-1">{{ category_name }}</h1>
+      <p class="text-muted mb-0">{{ products.count }} ürün bulundu</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    {% for p in products %}
+      <div class="col-sm-6 col-md-4">
+        <div class="card h-100 shadow-sm product-card">
+          {% if p.image %}
+            <img src="{{ p.image.url }}" class="card-img-top product-img" alt="{{ p.name }}">
+          {% else %}
+            <img src="https://placehold.co/600x400?text=Resim+Yok" class="card-img-top product-img" alt="{{ p.name }}">
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <div class="mb-2">
+              {% if p.category %}<span class="badge bg-success">{{ p.category.name }}</span>{% endif %}
+            </div>
+            <h5 class="card-title">{{ p.name }}</h5>
+            <p class="card-text text-muted small">{{ p.description|truncatechars:120 }}</p>
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+              <div><strong class="text-primary">{{ p.price }} TL</strong></div>
+              <div>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'store:product_detail' p.slug %}">Detay</a>
+                <a class="btn btn-sm btn-success ms-2" href="{% url 'store:add_to_cart' p.slug %}">Sepete Ekle</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <p class="text-center text-muted">Bu kategoride henüz ürün bulunmuyor.</p>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

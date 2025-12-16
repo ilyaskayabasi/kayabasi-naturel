@@ -1,93 +1,53 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="hero bg-light rounded p-4 mb-4">
-    <div class="d-md-flex align-items-center">
-      <div class="me-4">
-        <h1 class="display-6 mb-1">Kayabaşı Naturel</h1>
-        <p class="mb-0 text-muted">Zeytin, zeytinyağı ve arı ürünlerinde doğal ve güvenilir lezzetler.</p>
-      </div>
-      <div class="ms-auto d-none d-md-block">
-        <a href="#products" class="btn btn-success btn-lg">Ürünlere Göz At</a>
-      </div>
+  <div class="hero bg-light rounded p-4 mb-5">
+    <div class="text-center">
+      <h1 class="display-4 mb-3">Kayabaşı Naturel</h1>
+      <p class="lead text-muted mb-0">Zeytin, zeytinyağı ve arı ürünlerinde doğal ve güvenilir lezzetler.</p>
     </div>
   </div>
 
-  <!-- Arı Ürünleri -->
-  {% if bee_products %}
-  <section id="bee-products" class="mb-5">
-    <div class="d-flex align-items-center mb-4">
-      <h2 class="mb-0">🐝 Arı Ürünleri</h2>
-      <hr class="flex-grow-1 ms-3">
-    </div>
-    <div class="row g-4">
-      {% for p in bee_products %}
-        <div class="col-sm-6 col-md-4">
-          <div class="card h-100 shadow-sm product-card">
-            {% if p.image %}
-              <img src="{{ p.image.url }}" class="card-img-top product-img" alt="{{ p.name }}">
-            {% else %}
-              <img src="https://placehold.co/600x400?text=Resim+Yok" class="card-img-top product-img" alt="{{ p.name }}">
-            {% endif %}
-            <div class="card-body d-flex flex-column">
-              <div class="mb-2">
-                {% if p.category %}<span class="badge bg-warning text-dark">{{ p.category.name }}</span>{% endif %}
-              </div>
-              <h5 class="card-title">{{ p.name }}</h5>
-              <p class="card-text text-muted small">{{ p.description|truncatechars:120 }}</p>
-              <div class="mt-auto d-flex justify-content-between align-items-center">
-                <div><strong class="text-primary">{{ p.price }} TL</strong></div>
-                <div>
-                  <a class="btn btn-sm btn-outline-primary" href="{% url 'store:product_detail' p.slug %}">Detay</a>
-                  <a class="btn btn-sm btn-success ms-2" href="{% url 'store:add_to_cart' p.slug %}">Sepete Ekle</a>
-                </div>
-              </div>
+  <h2 class="text-center mb-5">Ürün Kategorileri</h2>
+  
+  <div class="row g-4 justify-content-center">
+    <!-- Arı Ürünleri Kartı -->
+    <div class="col-md-5">
+      <a href="{% url 'store:category_products' 'ari' %}" class="text-decoration-none">
+        <div class="card shadow-lg border-0 h-100 category-card" style="transition: transform 0.3s;">
+          <div class="card-body text-center p-5">
+            <div class="display-1 mb-4">🐝</div>
+            <h3 class="card-title mb-3">Arı Ürünleri</h3>
+            <p class="card-text text-muted">Bal, petek, polen, propolis ve daha fazlası...</p>
+            <div class="mt-4">
+              <span class="btn btn-warning">Ürünleri İncele</span>
             </div>
           </div>
         </div>
-      {% endfor %}
+      </a>
     </div>
-  </section>
-  {% endif %}
 
-  <!-- Zeytin Ürünleri -->
-  {% if olive_products %}
-  <section id="olive-products" class="mb-5">
-    <div class="d-flex align-items-center mb-4">
-      <h2 class="mb-0">🫒 Zeytin Ürünleri</h2>
-      <hr class="flex-grow-1 ms-3">
-    </div>
-    <div class="row g-4">
-      {% for p in olive_products %}
-        <div class="col-sm-6 col-md-4">
-          <div class="card h-100 shadow-sm product-card">
-            {% if p.image %}
-              <img src="{{ p.image.url }}" class="card-img-top product-img" alt="{{ p.name }}">
-            {% else %}
-              <img src="https://placehold.co/600x400?text=Resim+Yok" class="card-img-top product-img" alt="{{ p.name }}">
-            {% endif %}
-            <div class="card-body d-flex flex-column">
-              <div class="mb-2">
-                {% if p.category %}<span class="badge bg-success">{{ p.category.name }}</span>{% endif %}
-              </div>
-              <h5 class="card-title">{{ p.name }}</h5>
-              <p class="card-text text-muted small">{{ p.description|truncatechars:120 }}</p>
-              <div class="mt-auto d-flex justify-content-between align-items-center">
-                <div><strong class="text-primary">{{ p.price }} TL</strong></div>
-                <div>
-                  <a class="btn btn-sm btn-outline-primary" href="{% url 'store:product_detail' p.slug %}">Detay</a>
-                  <a class="btn btn-sm btn-success ms-2" href="{% url 'store:add_to_cart' p.slug %}">Sepete Ekle</a>
-                </div>
-              </div>
+    <!-- Zeytin Ürünleri Kartı -->
+    <div class="col-md-5">
+      <a href="{% url 'store:category_products' 'zeytin' %}" class="text-decoration-none">
+        <div class="card shadow-lg border-0 h-100 category-card" style="transition: transform 0.3s;">
+          <div class="card-body text-center p-5">
+            <div class="display-1 mb-4">🫒</div>
+            <h3 class="card-title mb-3">Zeytin Ürünleri</h3>
+            <p class="card-text text-muted">Sızma zeytinyağı, salamura zeytin ve daha fazlası...</p>
+            <div class="mt-4">
+              <span class="btn btn-success">Ürünleri İncele</span>
             </div>
           </div>
         </div>
-      {% endfor %}
+      </a>
     </div>
-  </section>
-  {% endif %}
+  </div>
 
-  {% if not bee_products and not olive_products %}
-    <p class="text-center text-muted">Henüz ürün yok.</p>
-  {% endif %}
+  <style>
+    .category-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+    }
+  </style>
 {% endblock %}

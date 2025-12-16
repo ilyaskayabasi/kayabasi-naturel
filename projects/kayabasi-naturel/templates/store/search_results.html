@@ -8,7 +8,7 @@
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'home' %}">Ana Sayfa</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'store:index' %}">Ana Sayfa</a></li>
             <li class="breadcrumb-item active">"{{ query }}" Arama Sonuçları</li>
         </ol>
     </nav>
@@ -30,7 +30,7 @@
 
     <div class="text-center py-5">
         <p class="mb-3">Lütfen arama teriminizi kontrol edin veya tüm ürünleri görün:</p>
-        <a href="{% url 'store:category' slug='all' %}" class="btn btn-primary">
+        <a href="{% url 'store:category_products' category_type='ari' %}" class="btn btn-primary">
             <i class="fas fa-shopping-bag"></i> Tüm Ürünleri Gözat
         </a>
     </div>

@@ -17,8 +17,15 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def index(request):
-    products = Product.objects.all()[:20]
-    return render(request, 'store/index.html', {'products': products})
+    # Kategorilere göre ürünleri grupla
+    bee_products = Product.objects.filter(category__name__icontains='arı').order_by('name')
+    olive_products = Product.objects.filter(category__name__icontains='zeytin').order_by('name')
+    
+    context = {
+        'bee_products': bee_products,
+        'olive_products': olive_products,
+    }
+    return render(request, 'store/index.html', context)
 
 
 def product_detail(request, slug):

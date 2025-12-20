@@ -212,7 +212,7 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('name', 'slug', 'category', 'description', 'image')
         }),
         ('Fiyat ve Stok', {
-            'fields': ('price', 'stock', 'unit')
+            'fields': ('price', 'stock', 'unit', 'available_units', 'min_order_amounts')
         }),
         ('Üretim Bilgileri', {
             'fields': ('production_location', 'production_process', 'production_date', 'harvest_date'),

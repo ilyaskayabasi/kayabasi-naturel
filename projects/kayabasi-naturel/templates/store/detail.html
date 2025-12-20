@@ -93,14 +93,18 @@
                         {% csrf_token %}
                         <div class="row g-2 mb-3">
                             <div class="col-md-4">
-                                <label class="form-label fw-bold">Miktar</label>
-                                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control">
+                                <label class="form-label fw-bold">Miktar
+                                    {% if default_min_amount %}
+                                        <small class="text-muted">(minimum <span id="minHint">{{ default_min_amount }} {{ product.unit }}</span>)</small>
+                                    {% endif %}
+                                </label>
+                                <input type="number" id="quantityInput" name="quantity" value="1" min="{% if default_min_amount %}{{ default_min_amount }}{% else %}1{% endif %}" max="{{ product.stock }}" class="form-control">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Ölçü Birimi</label>
-                                <select name="unit" class="form-select" required>
+                                <select name="unit" id="unitSelect" class="form-select" required>
                                     <option value="">Seçin</option>
-                                    {% for unit_value, unit_label in product.UNIT_CHOICES %}
+                                    {% for unit_value, unit_label in selectable_units %}
                                         <option value="{{ unit_value }}" {% if product.unit == unit_value %}selected{% endif %}>{{ unit_label }}</option>
                                     {% endfor %}
                                 </select>
@@ -230,4 +234,24 @@
         </div>
     </div>
 </div>
+<script>
+    (function() {
+        var minMap = {{ min_order_amounts|default:'{}'|safe }};
+        var unitSelect = document.getElementById('unitSelect');
+        var qtyInput = document.getElementById('quantityInput');
+        var minHint = document.getElementById('minHint');
+        function updateMin() {
+            if (!unitSelect || !qtyInput) return;
+            var u = unitSelect.value || '{{ product.unit }}';
+            var m = minMap && minMap[u] ? parseInt(minMap[u]) : 1;
+            qtyInput.min = m;
+            if (qtyInput.value < m) { qtyInput.value = m; }
+            if (minHint) { minHint.textContent = m + ' ' + u; }
+        }
+        if (unitSelect) {
+            unitSelect.addEventListener('change', updateMin);
+            updateMin();
+        }
+    })();
+</script>
 {% endblock %}

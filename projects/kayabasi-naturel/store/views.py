@@ -16,7 +16,7 @@ except Exception:
     class SignatureVerificationError(Exception):
         pass
 
-from .models import Product, Category, Order, OrderItem
+from .models import Product, Category, Order, OrderItem, Review
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -83,11 +83,28 @@ def product_detail(request, slug):
             else:
                 messages.error(request, 'Lütfen tüm alanları doldurun.')
     
+    unit_map = {
+        'g': 'Gram (g)',
+        'kg': 'Kilogram (kg)',
+        'ml': 'Mililitre (ml)',
+        'l': 'Litre (l)',
+        'adet': 'Adet',
+    }
+    allowed_units = product.available_units or [product.unit]
+    selectable_units = [(u, unit_map.get(u, u)) for u in allowed_units]
+
+    # Minimum miktar haritası
+    min_amounts = product.min_order_amounts or {}
+    default_min = min_amounts.get(product.unit)
+
     context = {
         'product': product,
         'reviews': reviews,
         'avg_rating': avg_rating,
         'review_count': reviews.count(),
+        'selectable_units': selectable_units,
+        'min_order_amounts': min_amounts,
+        'default_min_amount': default_min,
     }
     return render(request, 'store/detail.html', context)
 
@@ -100,7 +117,15 @@ def add_to_cart(request, slug):
     product = get_object_or_404(Product, slug=slug)
     cart = request.session.get('cart', {})
     qty = int(request.POST.get('quantity', 1)) if request.method == 'POST' else 1
-    unit = request.POST.get('unit', product.unit) if request.method == 'POST' else product.unit
+    allowed_units = product.available_units or [product.unit]
+    selected_unit = request.POST.get('unit') if request.method == 'POST' else product.unit
+    unit = selected_unit if selected_unit in allowed_units else product.unit
+    # Minimum sipariş miktarı kontrolü
+    min_amounts = product.min_order_amounts or {}
+    min_required = min_amounts.get(unit, 1)
+    if qty < min_required:
+        messages.error(request, f"{product.name} için minimum {min_required} {unit} sipariş verebilirsiniz.")
+        return redirect('store:product_detail', slug=slug)
     item = cart.get(slug, {'quantity': 0, 'price': str(product.price), 'name': product.name, 'unit': unit})
     item['quantity'] = item.get('quantity', 0) + qty
     item['unit'] = unit
@@ -120,7 +145,8 @@ def view_cart(request):
             continue
         quantity = data.get('quantity', 0)
         price = product.price
-        items.append({'product': product, 'quantity': quantity, 'total': price * quantity})
+        unit = data.get('unit', product.unit)
+        items.append({'product': product, 'quantity': quantity, 'unit': unit, 'total': price * quantity})
         total += price * quantity
     return render(request, 'store/cart_v2.html', {'items': items, 'total': total})
 
@@ -196,9 +222,11 @@ def checkout(request):
             continue
         qty = data.get('quantity', 0)
         subtotal = product.price * qty
+        unit = data.get('unit', product.unit)
         items.append({
             'product': product, 
             'quantity': qty, 
+            'unit': unit,
             'subtotal': subtotal
         })
         total += subtotal

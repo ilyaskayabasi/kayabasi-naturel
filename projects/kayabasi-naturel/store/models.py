@@ -33,6 +33,8 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(default=0)
     image = models.ImageField(upload_to='products/', null=True, blank=True)
     unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default='adet', verbose_name="Ölçü Birimi")
+    available_units = models.JSONField(default=list, verbose_name="Mevcut Ölçü Birimleri", help_text="Müşterilerin seçebileceği ölçü birimleri (kg, g, ml, l, adet)")
+    min_order_amounts = models.JSONField(default=dict, verbose_name="Minimum Sipariş Miktarları", help_text="Ölçü birimine göre minimum miktar (ör. {'g': 50, 'kg': 1})")
     created_at = models.DateTimeField(auto_now_add=True)
     
     # Detaylı ürün bilgileri

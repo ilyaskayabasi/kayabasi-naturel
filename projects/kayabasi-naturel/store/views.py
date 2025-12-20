@@ -25,6 +25,10 @@ def index(request):
     return render(request, 'store/index.html')
 
 
+def healthz(request):
+    return JsonResponse({'status': 'ok', 'time': str(models.functions.Now())})
+
+
 def category_products(request, category_type):
     if category_type == 'ari':
         products = Product.objects.filter(category__name__icontains='arı').order_by('name')
@@ -261,6 +265,14 @@ def order_success(request):
     # clear cart
     request.session['cart'] = {}
     return render(request, 'store/order_success.html', {'order': order})
+
+
+def custom_404(request, exception):
+    return render(request, '404.html', status=404)
+
+
+def custom_500(request):
+    return render(request, '500.html', status=500)
 
 
 def stripe_webhook(request):

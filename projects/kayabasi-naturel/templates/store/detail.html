@@ -1,4 +1,38 @@
 {% extends 'base.html' %}
+{% block extra_head %}
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{{ product.name }}">
+    <meta property="og:description" content="{{ product.description|default:'Doğal ürün'|truncatechars:200 }}">
+    {% if product.image %}
+        <meta property="og:image" content="{{ product.image.url }}">
+    {% endif %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "{{ product.name|escapejs }}",
+        "description": "{{ product.description|default:''|truncatechars:300|escapejs }}",
+        {% if product.image %}
+        "image": "{{ product.image.url }}",
+        {% endif %}
+        "sku": "{{ product.slug|escapejs }}",
+        "url": "{{ request.build_absolute_uri }}",
+        "offers": {
+            "@type": "Offer",
+            "priceCurrency": "TRY",
+            "price": "{{ product.price }}",
+            "availability": "https://schema.org/{% if product.stock > 0 %}InStock{% else %}OutOfStock{% endif %}"
+        }
+        {% if avg_rating %},
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "{{ avg_rating|floatformat:1 }}",
+            "reviewCount": "{{ review_count }}"
+        }
+        {% endif %}
+    }
+    </script>
+{% endblock %}
 
 {% block title %}{{ product.name }} - Kayabaşı Naturel{% endblock %}
 

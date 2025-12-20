@@ -38,6 +38,11 @@
               </p>
               <p class="mb-1"><strong>Birim Fiyat:</strong> {{ it.product.price }} TL</p>
               <p class="mb-1"><strong>Adet:</strong> {{ it.quantity }} x {{ it.unit }}</p>
+              <div class="mt-2">
+                <a href="{% url 'store:remove_from_cart' it.product.slug %}" class="btn btn-sm btn-outline-danger">
+                  <i class="fas fa-trash"></i> Sil
+                </a>
+              </div>
             </div>
             <div class="text-end">
               <h5 class="text-success mb-0">{{ it.total }} TL</h5>

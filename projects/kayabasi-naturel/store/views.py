@@ -153,6 +153,19 @@ def add_to_cart(request, slug):
     return redirect('store:view_cart')
 
 
+def remove_from_cart(request, slug):
+    """Sepetten ürün sil"""
+    cart = request.session.get('cart', {})
+    if slug in cart:
+        product_name = cart[slug]['name']
+        del cart[slug]
+        request.session['cart'] = cart
+        messages.success(request, f'{product_name} sepetten çıkarıldı.')
+    else:
+        messages.warning(request, 'Ürün sepette bulunamadı.')
+    return redirect('store:view_cart')
+
+
 def view_cart(request):
     cart = request.session.get('cart', {})
     total = 0

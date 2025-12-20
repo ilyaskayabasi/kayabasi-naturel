@@ -103,7 +103,14 @@
             {% endif %}
 
             <!-- Fiyat -->
-            <h3 class="text-success fw-bold mb-3">{{ product.price|floatformat:2 }} TL</h3>
+            <div class="mb-3">
+                <h3 class="text-success fw-bold mb-2">
+                    <span id="totalPrice">{{ product.price|floatformat:2 }}</span> TL
+                </h3>
+                <small class="text-muted" id="pricePerUnit">
+                    Birim fiyat: <span id="unitPrice">{{ product.price|floatformat:2 }}</span> TL
+                </small>
+            </div>
 
             <!-- Stok -->
             <div class="mb-4">
@@ -274,10 +281,14 @@
     (function() {
         var minMap = {{ min_order_amounts|default:'{}'|safe }};
         var stepMap = {{ quantity_steps|default:'{}'|safe }};
+        var basePrice = {{ product.price }};
         var unitSelect = document.getElementById('unitSelect');
         var qtyInput = document.getElementById('quantityInput');
         var minHint = document.getElementById('minHint');
         var stepHint = document.getElementById('stepHint');
+        var totalPriceElem = document.getElementById('totalPrice');
+        var unitPriceElem = document.getElementById('unitPrice');
+
         function updateMin() {
             if (!unitSelect || !qtyInput) return;
             var u = unitSelect.value || '{{ product.unit }}';
@@ -288,11 +299,27 @@
             if (qtyInput.value < m) { qtyInput.value = m; }
             if (minHint) { minHint.textContent = m + ' ' + u; }
             if (stepHint) { stepHint.textContent = s + ' ' + u; }
+            updatePrice();
         }
+
+        function updatePrice() {
+            if (!qtyInput || !totalPriceElem) return;
+            var qty = parseInt(qtyInput.value) || 1;
+            var total = (basePrice * qty).toFixed(2);
+            var unitPrice = basePrice.toFixed(2);
+            totalPriceElem.textContent = total;
+            unitPriceElem.textContent = unitPrice;
+        }
+
         if (unitSelect) {
             unitSelect.addEventListener('change', updateMin);
             updateMin();
         }
+        if (qtyInput) {
+            qtyInput.addEventListener('change', updatePrice);
+            qtyInput.addEventListener('input', updatePrice);
+        }
+        updatePrice();
     })();
 </script>
 {% endblock %}

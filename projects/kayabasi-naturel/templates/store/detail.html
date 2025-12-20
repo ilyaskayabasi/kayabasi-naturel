@@ -129,34 +129,48 @@
                 {% endif %}
             </div>
 
-            <!-- Sepete Ekle -->
+            <!-- Sepete Ekle - Paket Sistemi -->
             <div class="mb-4">
                 {% if product.stock > 0 %}
                     <form method="POST" action="{% url 'store:add_to_cart' product.slug %}">
                         {% csrf_token %}
+                        <!-- Paket Seçimi -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold d-block mb-3">📦 Paket Seçin</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for package in product.packages %}
+                                    <label class="btn btn-outline-success btn-lg" style="cursor: pointer; padding: 12px 16px;">
+                                        <input type="radio" name="package" value="{{ package.size }}" required 
+                                               {% if forloop.first %}checked{% endif %}
+                                               onchange="updatePackagePrice(this.value)"
+                                               style="display: none;">
+                                        <strong>{{ package.size }}</strong>
+                                        {% if package.price %}
+                                            <br><small>₺{{ package.price|floatformat:2 }}</small>
+                                        {% else %}
+                                            <br><small>₺{{ product.price|floatformat:2 }}</small>
+                                        {% endif %}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Adet -->
                         <div class="row g-2 mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Miktar
-                                    {% if default_min_amount %}
-                                        <small class="text-muted">(minimum <span id="minHint">{{ default_min_amount }} {{ product.unit }}</span>{% if default_step %}, adım <span id="stepHint">{{ default_step }} {{ product.unit }}</span>{% endif %})</small>
-                                    {% endif %}
-                                </label>
-                                <input type="number" id="quantityInput" name="quantity" value="{% if default_min_amount %}{{ default_min_amount }}{% else %}1{% endif %}" min="{% if default_min_amount %}{{ default_min_amount }}{% else %}1{% endif %}" step="{% if default_step %}{{ default_step }}{% else %}1{% endif %}" class="form-control">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Adet</label>
+                                <input type="number" id="quantityInput" name="quantity" value="1" min="1" max="999" class="form-control" style="font-size: 16px;">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Ölçü Birimi</label>
-                                <select name="unit" id="unitSelect" class="form-select" required>
-                                    <option value="">Seçin</option>
-                                    {% for unit_value, unit_label in selectable_units %}
-                                        <option value="{{ unit_value }}" {% if product.unit == unit_value %}selected{% endif %}>{{ unit_label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-4 d-flex align-items-end">
-                                <button class="btn btn-success w-100" type="submit">
+                            <div class="col-md-6 d-flex align-items-end">
+                                <button class="btn btn-success w-100" type="submit" style="padding: 10px; font-size: 16px; font-weight: bold;">
                                     <i class="fas fa-shopping-cart"></i> Sepete Ekle
                                 </button>
                             </div>
+                        </div>
+
+                        <!-- Toplam Fiyat Gösterimi -->
+                        <div class="alert alert-light border-2 border-success" style="text-align: center;">
+                            <strong style="font-size: 18px;">Toplam: <span id="totalPrice">{{ product.price|floatformat:2 }}</span> TL</strong>
                         </div>
                     </form>
                 {% else %}
@@ -278,48 +292,29 @@
     </div>
 </div>
 <script>
-    (function() {
-        var minMap = {{ min_order_amounts|default:'{}'|safe }};
-        var stepMap = {{ quantity_steps|default:'{}'|safe }};
-        var basePrice = {{ product.price }};
-        var unitSelect = document.getElementById('unitSelect');
-        var qtyInput = document.getElementById('quantityInput');
-        var minHint = document.getElementById('minHint');
-        var stepHint = document.getElementById('stepHint');
-        var totalPriceElem = document.getElementById('totalPrice');
-        var unitPriceElem = document.getElementById('unitPrice');
+    // Paket verisi
+    const packages = {{ product.packages|safe }};
+    const basePrice = {{ product.price }};
 
-        function updateMin() {
-            if (!unitSelect || !qtyInput) return;
-            var u = unitSelect.value || '{{ product.unit }}';
-            var m = minMap && minMap[u] ? parseInt(minMap[u]) : 1;
-            var s = stepMap && stepMap[u] ? parseInt(stepMap[u]) : 1;
-            qtyInput.min = m;
-            qtyInput.step = s;
-            if (qtyInput.value < m) { qtyInput.value = m; }
-            if (minHint) { minHint.textContent = m + ' ' + u; }
-            if (stepHint) { stepHint.textContent = s + ' ' + u; }
-            updatePrice();
-        }
+    function updatePackagePrice(size) {
+        const pkg = packages.find(p => p.size === size);
+        const price = pkg && pkg.price ? parseFloat(pkg.price) : basePrice;
+        const qty = parseInt(document.getElementById('quantityInput').value) || 1;
+        const total = (price * qty).toFixed(2);
+        document.getElementById('totalPrice').textContent = total;
+    }
 
-        function updatePrice() {
-            if (!qtyInput || !totalPriceElem) return;
-            var qty = parseInt(qtyInput.value) || 1;
-            var total = (basePrice * qty).toFixed(2);
-            var unitPrice = basePrice.toFixed(2);
-            totalPriceElem.textContent = total;
-            unitPriceElem.textContent = unitPrice;
+    function updateTotalPrice() {
+        const selectedPackage = document.querySelector('input[name="package"]:checked');
+        if (selectedPackage) {
+            updatePackagePrice(selectedPackage.value);
         }
+    }
 
-        if (unitSelect) {
-            unitSelect.addEventListener('change', updateMin);
-            updateMin();
-        }
-        if (qtyInput) {
-            qtyInput.addEventListener('change', updatePrice);
-            qtyInput.addEventListener('input', updatePrice);
-        }
-        updatePrice();
-    })();
+    // Adet değiştiğinde güncelle
+    document.getElementById('quantityInput')?.addEventListener('input', updateTotalPrice);
+    
+    // İlk paket seçiliyse fiyat göster
+    window.addEventListener('load', updateTotalPrice);
 </script>
 {% endblock %}

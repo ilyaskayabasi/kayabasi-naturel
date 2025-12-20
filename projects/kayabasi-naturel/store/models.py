@@ -48,6 +48,8 @@ class Product(models.Model):
     shelf_life = models.CharField(max_length=100, blank=True, verbose_name="Raf Ömrü")
     weight = models.CharField(max_length=50, blank=True, verbose_name="Net Ağırlık")
     certificates = models.TextField(blank=True, verbose_name="Sertifikalar")
+    # Paket tabanlı satış sistemi: [{"size": "50g", "price": 10.50}, {"size": "250g", "price": 45.00}]
+    packages = models.JSONField(default=list, blank=True, verbose_name="Ürün Paketleri", help_text="Satış paketleri: [{'size': '50g', 'price': 10.50}, {'size': '250g', 'price': 45.00}]")
 
     class Meta:
         ordering = ['-created_at']

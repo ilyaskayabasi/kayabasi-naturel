@@ -125,27 +125,32 @@ def add_to_cart(request, slug):
     product = get_object_or_404(Product, slug=slug)
     cart = request.session.get('cart', {})
     qty = int(request.POST.get('quantity', 1)) if request.method == 'POST' else 1
-    allowed_units = product.available_units or [product.unit]
-    selected_unit = request.POST.get('unit') if request.method == 'POST' else product.unit
-    unit = selected_unit if selected_unit in allowed_units else product.unit
-    # Minimum sipariş miktarı kontrolü
-    min_amounts = product.min_order_amounts or {}
-    min_required = min_amounts.get(unit, 1)
-    if qty < min_required:
-        messages.error(request, f"{product.name} için minimum {min_required} {unit} sipariş verebilirsiniz.")
+    
+    # Paket seçimi
+    selected_package = request.POST.get('package') if request.method == 'POST' else None
+    if not selected_package and product.packages:
+        selected_package = product.packages[0]['size']
+    
+    # Paket fiyatını bul
+    package_price = product.price
+    if selected_package and product.packages:
+        for pkg in product.packages:
+            if pkg['size'] == selected_package:
+                package_price = float(pkg.get('price') or product.price)
+                break
+    
+    if qty < 1:
+        messages.error(request, "Adet en az 1 olmalıdır.")
         return redirect('store:product_detail', slug=slug)
-    # Artış adımı kontrolü (qty, step'in katı olmalı)
-    step_map = product.quantity_steps or {}
-    step = int(step_map.get(unit, 1))
-    if qty % step != 0:
-        messages.error(request, f"{product.name} için {unit} biriminde {step} adımında sipariş verebilirsiniz (örn: {min_required}, {min_required + step}, ...)")
-        return redirect('store:product_detail', slug=slug)
-    item = cart.get(slug, {'quantity': 0, 'price': str(product.price), 'name': product.name, 'unit': unit})
+    
+    item = cart.get(slug, {'quantity': 0, 'price': str(package_price), 'name': product.name, 'package': selected_package})
     item['quantity'] = item.get('quantity', 0) + qty
-    item['unit'] = unit
+    item['package'] = selected_package
+    item['price'] = str(package_price)
     cart[slug] = item
     request.session['cart'] = cart
-    return redirect('store:index')
+    messages.success(request, f'{product.name} ({selected_package}) sepete eklendi!')
+    return redirect('store:view_cart')
 
 
 def view_cart(request):

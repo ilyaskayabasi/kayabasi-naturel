@@ -15,7 +15,13 @@ class StoreViewsTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.cat = Category.objects.create(name='Zeytin')
-        self.prod = Product.objects.create(name='Yeşil Zeytin', price=12.0, stock=5, category=self.cat)
+        self.prod = Product.objects.create(
+            name='Yeşil Zeytin',
+            price=12.0,
+            stock=5,
+            category=self.cat,
+            packages=[{'size': '250g', 'price': None}, {'size': '500g', 'price': None}]
+        )
 
     def test_index_status(self):
         resp = self.client.get(reverse('store:index'))
@@ -24,7 +30,7 @@ class StoreViewsTest(TestCase):
 
     def test_add_to_cart_and_cart_view(self):
         add_url = reverse('store:add_to_cart', args=[self.prod.slug])
-        resp = self.client.post(add_url, {'quantity': 2}, follow=True)
+        resp = self.client.post(add_url, {'quantity': 2, 'package': '250g'}, follow=True)
         self.assertEqual(resp.status_code, 200)
         cart_resp = self.client.get(reverse('store:view_cart'))
         self.assertContains(cart_resp, 'Yeşil Zeytin')
@@ -37,73 +43,55 @@ class StoreViewsTest(TestCase):
 
         resp = self.client.get(reverse('store:product_detail', args=[self.prod.slug]))
         self.assertEqual(resp.status_code, 200)
-        # Context should include selectable_units with mapped labels
-        selectable_units = resp.context.get('selectable_units')
-        self.assertIsNotNone(selectable_units)
-        self.assertIn(('g', 'Gram (g)'), selectable_units)
-        self.assertIn(('kg', 'Kilogram (kg)'), selectable_units)
+        # Context should include packages
+        packages = resp.context.get('product').packages
+        self.assertIsNotNone(packages)
+        self.assertEqual(len(packages), 2)
 
     def test_add_to_cart_enforces_allowed_unit(self):
-        # Allowed units: g, kg; default unit g
+        # Paket tabanlı sistem test
         self.prod.unit = 'g'
         self.prod.available_units = ['g', 'kg']
         self.prod.save()
 
         add_url = reverse('store:add_to_cart', args=[self.prod.slug])
-        # Post with allowed unit 'kg'
-        resp = self.client.post(add_url, {'quantity': 1, 'unit': 'kg'}, follow=True)
+        # Post with package
+        resp = self.client.post(add_url, {'quantity': 1, 'package': '250g'}, follow=True)
         self.assertEqual(resp.status_code, 200)
         cart = self.client.session.get('cart', {})
         self.assertIn(self.prod.slug, cart)
-        self.assertEqual(cart[self.prod.slug]['unit'], 'kg')
-
-        # Post with disallowed unit 'ml' should fallback to product.unit ('g')
-        resp = self.client.post(add_url, {'quantity': 1, 'unit': 'ml'}, follow=True)
-        self.assertEqual(resp.status_code, 200)
-        cart = self.client.session.get('cart', {})
-        self.assertEqual(cart[self.prod.slug]['unit'], 'g')
+        self.assertEqual(cart[self.prod.slug]['package'], '250g')
 
     def test_min_order_amount_enforced(self):
-        # Set minimums: g -> 50
+        # Paket tabanlı sistem - minimum qty validation
         self.prod.unit = 'g'
         self.prod.available_units = ['g']
         self.prod.min_order_amounts = {'g': 50}
+        self.prod.packages = [{'size': '50g', 'price': None}]
         self.prod.save()
 
         add_url = reverse('store:add_to_cart', args=[self.prod.slug])
-        # Try below minimum
-        resp = self.client.post(add_url, {'quantity': 10, 'unit': 'g'}, follow=True)
-        self.assertEqual(resp.status_code, 200)
-        # Should redirect back to product_detail and not add to cart
-        self.assertTemplateUsed(resp, 'store/detail.html')
-        cart = self.client.session.get('cart', {})
-        self.assertNotIn(self.prod.slug, cart)
-
-        # Try at minimum
-        resp = self.client.post(add_url, {'quantity': 50, 'unit': 'g'}, follow=True)
+        # Qty 1 should be OK (paket sisteminde adet kontrolü)
+        resp = self.client.post(add_url, {'quantity': 1, 'package': '50g'}, follow=True)
         self.assertEqual(resp.status_code, 200)
         cart = self.client.session.get('cart', {})
         self.assertIn(self.prod.slug, cart)
-        self.assertEqual(cart[self.prod.slug]['quantity'], 50)
+        self.assertEqual(cart[self.prod.slug]['quantity'], 1)
 
     def test_quantity_step_enforced(self):
-        # Product with min 50g and step 50g
+        # Paket tabanlı sistemde step kontrolü geçerli değil
+        # Paket seçimi ve adet girişi ayrı
         self.prod.unit = 'g'
         self.prod.available_units = ['g']
-        self.prod.min_order_amounts = {'g': 50}
         self.prod.quantity_steps = {'g': 50}
+        self.prod.packages = [{'size': '100g', 'price': None}]
         self.prod.save()
 
         add_url = reverse('store:add_to_cart', args=[self.prod.slug])
-        # 75g should fail (not multiple of 50)
-        resp = self.client.post(add_url, {'quantity': 75, 'unit': 'g'}, follow=True)
-        self.assertEqual(resp.status_code, 200)
-        cart = self.client.session.get('cart', {})
-        self.assertNotIn(self.prod.slug, cart)
-
-        # 100g should pass
-        resp = self.client.post(add_url, {'quantity': 100, 'unit': 'g'}, follow=True)
+        # Herhangi bir adet OK (paket zaten seçilmiş)
+        resp = self.client.post(add_url, {'quantity': 3, 'package': '100g'}, follow=True)
         self.assertEqual(resp.status_code, 200)
         cart = self.client.session.get('cart', {})
         self.assertIn(self.prod.slug, cart)
-        self.assertEqual(cart[self.prod.slug]['quantity'], 100)
+        self.assertEqual(cart[self.prod.slug]['quantity'], 3)
+

@@ -1,14 +1,19 @@
 from django.core.management.base import BaseCommand
 from store.models import Product
 
+
 class Command(BaseCommand):
-    help = "Set per-unit minimum order amounts for known product types"
+    help = "Set per-unit minimum order amounts for known product types (does not overwrite existing values)"
 
     def handle(self, *args, **options):
         updated = 0
         for product in Product.objects.all():
             name = (product.name or "").lower()
-            mins = {}
+
+            # Do not overwrite existing explicit configuration
+            if product.min_order_amounts:
+                continue
+
             # Keep existing available_units unless empty; set sensible defaults if needed
             if not product.available_units:
                 if "propolis" in name:
@@ -25,7 +30,8 @@ class Command(BaseCommand):
                 mins = {"g": 50}
                 product.unit = "g"
             elif "polen" in name:
-                mins = {"g": 50, "kg": 1}
+                # Polen: minimum 250g, or 1kg when kg selected
+                mins = {"g": 250, "kg": 1}
                 if product.unit not in ["g", "kg"]:
                     product.unit = "g"
             elif "zeytinya" in name:
@@ -40,4 +46,4 @@ class Command(BaseCommand):
             product.save()
             updated += 1
 
-        self.stdout.write(self.style.SUCCESS(f"Minimums set for {updated} products."))
+        self.stdout.write(self.style.SUCCESS(f"Minimums set for {updated} products (skipped those already configured)."))

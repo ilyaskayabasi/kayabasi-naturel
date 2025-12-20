@@ -96,6 +96,8 @@ def product_detail(request, slug):
     # Minimum miktar haritası
     min_amounts = product.min_order_amounts or {}
     default_min = min_amounts.get(product.unit)
+    step_map = product.quantity_steps or {}
+    default_step = step_map.get(product.unit)
 
     context = {
         'product': product,
@@ -105,6 +107,8 @@ def product_detail(request, slug):
         'selectable_units': selectable_units,
         'min_order_amounts': min_amounts,
         'default_min_amount': default_min,
+        'quantity_steps': step_map,
+        'default_step': default_step,
     }
     return render(request, 'store/detail.html', context)
 
@@ -125,6 +129,12 @@ def add_to_cart(request, slug):
     min_required = min_amounts.get(unit, 1)
     if qty < min_required:
         messages.error(request, f"{product.name} için minimum {min_required} {unit} sipariş verebilirsiniz.")
+        return redirect('store:product_detail', slug=slug)
+    # Artış adımı kontrolü (qty, step'in katı olmalı)
+    step_map = product.quantity_steps or {}
+    step = int(step_map.get(unit, 1))
+    if qty % step != 0:
+        messages.error(request, f"{product.name} için {unit} biriminde {step} adımında sipariş verebilirsiniz (örn: {min_required}, {min_required + step}, ...)")
         return redirect('store:product_detail', slug=slug)
     item = cart.get(slug, {'quantity': 0, 'price': str(product.price), 'name': product.name, 'unit': unit})
     item['quantity'] = item.get('quantity', 0) + qty

@@ -85,3 +85,25 @@ class StoreViewsTest(TestCase):
         cart = self.client.session.get('cart', {})
         self.assertIn(self.prod.slug, cart)
         self.assertEqual(cart[self.prod.slug]['quantity'], 50)
+
+    def test_quantity_step_enforced(self):
+        # Product with min 50g and step 50g
+        self.prod.unit = 'g'
+        self.prod.available_units = ['g']
+        self.prod.min_order_amounts = {'g': 50}
+        self.prod.quantity_steps = {'g': 50}
+        self.prod.save()
+
+        add_url = reverse('store:add_to_cart', args=[self.prod.slug])
+        # 75g should fail (not multiple of 50)
+        resp = self.client.post(add_url, {'quantity': 75, 'unit': 'g'}, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        cart = self.client.session.get('cart', {})
+        self.assertNotIn(self.prod.slug, cart)
+
+        # 100g should pass
+        resp = self.client.post(add_url, {'quantity': 100, 'unit': 'g'}, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        cart = self.client.session.get('cart', {})
+        self.assertIn(self.prod.slug, cart)
+        self.assertEqual(cart[self.prod.slug]['quantity'], 100)

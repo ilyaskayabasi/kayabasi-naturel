@@ -95,10 +95,10 @@
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Miktar
                                     {% if default_min_amount %}
-                                        <small class="text-muted">(minimum <span id="minHint">{{ default_min_amount }} {{ product.unit }}</span>)</small>
+                                        <small class="text-muted">(minimum <span id="minHint">{{ default_min_amount }} {{ product.unit }}</span>{% if default_step %}, adım <span id="stepHint">{{ default_step }} {{ product.unit }}</span>{% endif %})</small>
                                     {% endif %}
                                 </label>
-                                <input type="number" id="quantityInput" name="quantity" value="1" min="{% if default_min_amount %}{{ default_min_amount }}{% else %}1{% endif %}" class="form-control">
+                                <input type="number" id="quantityInput" name="quantity" value="{% if default_min_amount %}{{ default_min_amount }}{% else %}1{% endif %}" min="{% if default_min_amount %}{{ default_min_amount }}{% else %}1{% endif %}" step="{% if default_step %}{{ default_step }}{% else %}1{% endif %}" class="form-control">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Ölçü Birimi</label>
@@ -237,16 +237,21 @@
 <script>
     (function() {
         var minMap = {{ min_order_amounts|default:'{}'|safe }};
+        var stepMap = {{ quantity_steps|default:'{}'|safe }};
         var unitSelect = document.getElementById('unitSelect');
         var qtyInput = document.getElementById('quantityInput');
         var minHint = document.getElementById('minHint');
+        var stepHint = document.getElementById('stepHint');
         function updateMin() {
             if (!unitSelect || !qtyInput) return;
             var u = unitSelect.value || '{{ product.unit }}';
             var m = minMap && minMap[u] ? parseInt(minMap[u]) : 1;
+            var s = stepMap && stepMap[u] ? parseInt(stepMap[u]) : 1;
             qtyInput.min = m;
+            qtyInput.step = s;
             if (qtyInput.value < m) { qtyInput.value = m; }
             if (minHint) { minHint.textContent = m + ' ' + u; }
+            if (stepHint) { stepHint.textContent = s + ' ' + u; }
         }
         if (unitSelect) {
             unitSelect.addEventListener('change', updateMin);

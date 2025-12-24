@@ -23,5 +23,5 @@ urlpatterns = [
 handler404 = 'store.views.custom_404'
 handler500 = 'store.views.custom_500'
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files even when DEBUG=False (low-traffic/simple deployment on Render)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

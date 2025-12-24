@@ -30,12 +30,13 @@ def healthz(request):
 
 
 def category_products(request, category_type):
+    # Kategori filtresi
     if category_type == 'ari':
-        products = Product.objects.filter(category__name__icontains='arı').order_by('name')
+        products = Product.objects.filter(category__name__icontains='arı')
         category_name = 'Arı Ürünleri'
         category_icon = '🐝'
     elif category_type == 'zeytin':
-        products = Product.objects.filter(category__name__icontains='zeytin').order_by('name')
+        products = Product.objects.filter(category__name__icontains='zeytin')
         category_name = 'Zeytin Ürünleri'
         category_icon = '🫒'
     else:
@@ -43,10 +44,22 @@ def category_products(request, category_type):
         category_name = 'Ürünler'
         category_icon = '📦'
     
+    # Sıralama
+    sort_by = request.GET.get('sort', 'default')
+    if sort_by == 'price':
+        products = products.order_by('price')
+    elif sort_by == 'price-desc':
+        products = products.order_by('-price')
+    elif sort_by == 'name':
+        products = products.order_by('name')
+    else:
+        products = products.order_by('name')
+    
     context = {
         'products': products,
         'category_name': category_name,
         'category_icon': category_icon,
+        'current_sort': sort_by,
     }
     return render(request, 'store/category.html', context)
 

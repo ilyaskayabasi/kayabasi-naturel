@@ -1,30 +1,118 @@
 {% extends 'base.html' %}
 
-{% block content %}
-  <!-- Kategori Banner -->
-  <div class="category-banner mb-5" style="
-    background: linear-gradient(135deg, rgba(40,167,69,0.9) 0%, rgba(0,123,255,0.9) 100%);
+{% block extra_head %}
+<style>
+  .category-banner {
     border-radius: 12px;
     padding: 60px 40px;
     color: white;
     position: relative;
     overflow: hidden;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .category-icon {
+    font-size: 80px;
+    margin-right: 30px;
+  }
+  
+  .category-title {
+    font-size: 48px;
+    font-weight: 700;
+  }
+  
+  .product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+  }
+  
+  .product-card:hover .card-img-top {
+    transform: scale(1.05);
+  }
+  
+  .card-img-top {
+    transition: transform 0.3s ease;
+  }
+  
+  /* Mobil responsive */
+  @media (max-width: 768px) {
+    .category-banner {
+      padding: 30px 20px;
+    }
+    .category-icon {
+      font-size: 50px;
+      margin-right: 15px;
+    }
+    .category-title {
+      font-size: 28px;
+    }
+    .category-description {
+      font-size: 14px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'store:index' %}">Ana Sayfa</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ category_name }}</li>
+    </ol>
+  </nav>
+
+  <!-- Kategori Banner -->
+  <div class="category-banner mb-5" style="
+    {% if 'ari' in category_name|lower %}
+      background: linear-gradient(135deg, rgba(40,167,69,0.7) 0%, rgba(0,123,255,0.7) 100%), url('/static/img/category-covers/ari-urunleri.jpg') center/cover no-repeat;
+    {% elif 'zeytin' in category_name|lower %}
+      background: linear-gradient(135deg, rgba(139,69,19,0.7) 0%, rgba(184,134,11,0.7) 100%), url('/static/img/category-covers/zeytin.jpg') center/cover no-repeat;
+    {% else %}
+      background: linear-gradient(135deg, rgba(40,167,69,0.85) 0%, rgba(0,123,255,0.85) 100%);
+    {% endif %}
   ">
-    <div class="mb-3">
-      <a href="{% url 'store:index' %}" class="btn btn-light btn-sm">← Ana Sayfaya Dön</a>
+    <div class="d-flex align-items-center flex-wrap">
+      <div class="category-icon">{{ category_icon }}</div>
+      <div class="flex-grow-1">
+        <h1 class="mb-2 category-title">{{ category_name }}</h1>
+        <p class="mb-3 category-description" style="font-size: 18px; opacity: 0.95;">
+          {% if 'ari' in category_name|lower %}
+            Bal, petek, polen, propolis ve daha fazlası. Doğal ve katkısız arı ürünleri.
+          {% elif 'zeytin' in category_name|lower %}
+            Ege'nin en kaliteli zeytinleri ve soğuk sıkım zeytinyağı.
+          {% else %}
+            Doğal ve taze ürünler, sofranıza özenle sunulur.
+          {% endif %}
+        </p>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <span class="badge bg-light text-dark px-3 py-2">{{ products.count }} Ürün</span>
+          <a href="#products" class="btn btn-light btn-sm">Ürünleri İncele ↓</a>
+        </div>
+      </div>
     </div>
-    <div class="d-flex align-items-center">
-      <div style="font-size: 80px; margin-right: 30px;">{{ category_icon }}</div>
-      <div>
-        <h1 class="mb-2" style="font-size: 48px; font-weight: 700;">{{ category_name }}</h1>
-        <p class="mb-0" style="font-size: 18px; opacity: 0.95;">{{ products.count }} ürün bulundu</p>
+  </div>
+
+  <!-- Ürün Listesi -->
+  <div id="products" class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0">Tüm Ürünler</h3>
+      <div class="btn-group btn-group-sm" role="group">
+        <button type="button" class="btn btn-outline-secondary active">Varsayılan</button>
+        <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='?sort=price'">Fiyat</button>
+        <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='?sort=name'">İsim</button>
       </div>
     </div>
   </div>
 
   <div class="row g-4">
     {% for p in products %}
-      <div class="col-sm-6 col-md-4">
+      <div class="col-sm-6 col-md-4 col-lg-3">
         <div class="card h-100 shadow-sm product-card">
           {% if p.image %}
             <img src="{{ p.image.url }}" class="card-img-top product-img" alt="{{ p.name }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=Resim+Yok';">
@@ -37,11 +125,11 @@
             </div>
             <h5 class="card-title">{{ p.name }}</h5>
             <p class="card-text text-muted small">{{ p.description|truncatechars:120 }}</p>
-            <div class="mt-auto d-flex justify-content-between align-items-center">
-              <div><strong class="text-primary">{{ p.price }} TL</strong></div>
-              <div>
-                <a class="btn btn-sm btn-outline-primary" href="{% url 'store:product_detail' p.slug %}">Detay</a>
-                <a class="btn btn-sm btn-success ms-2" href="{% url 'store:add_to_cart' p.slug %}">Sepete Ekle</a>
+            <div class="mt-auto">
+              <div class="mb-2"><strong class="text-success fs-5">{{ p.price }} TL</strong></div>
+              <div class="d-grid gap-2">
+                <a class="btn btn-outline-primary btn-sm" href="{% url 'store:product_detail' p.slug %}">Detayları Gör</a>
+                <a class="btn btn-success btn-sm" href="{% url 'store:add_to_cart' p.slug %}">Sepete Ekle</a>
               </div>
             </div>
           </div>
@@ -49,7 +137,9 @@
       </div>
     {% empty %}
       <div class="col-12">
-        <p class="text-center text-muted">Bu kategoride henüz ürün bulunmuyor.</p>
+        <div class="alert alert-info text-center">
+          <i class="fas fa-info-circle"></i> Bu kategoride henüz ürün bulunmuyor.
+        </div>
       </div>
     {% endfor %}
   </div>

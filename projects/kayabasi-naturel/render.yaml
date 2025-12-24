@@ -3,11 +3,12 @@ services:
     name: kayabasi-naturel
     env: python
     plan: free
+    rootDirectory: projects/kayabasi-naturel
     buildCommand: |
       pip install --upgrade pip
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
-    startCommand: gunicorn config.wsgi:application
+    startCommand: bash -lc "python manage.py migrate --noinput && gunicorn config.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"

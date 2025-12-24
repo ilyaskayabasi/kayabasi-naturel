@@ -1,33 +1,148 @@
-# Kayabaşı Naturel - Django Scaffold
+# Kayabaşı Naturel - Django E-Ticaret Platformu
 
-Bu klasör yerel geliştirme için hızlı bir Django iskeleti içerir.
+Modern ve performanslı bir e-ticaret sitesi. Doğal arı ürünleri ve zeytincilik ürünlerinin satışı için tasarlanmıştır.
 
-Hızlı başlatma (PowerShell):
+## 🚀 Özellikler
+
+- ✅ **Kategori Sayfaları**: Banner, breadcrumb, sıralama, hover animasyonları
+- ✅ **Ürün Detay**: Galeri, paket seçimi, dinamik fiyatlandırma, yorumlar
+- ✅ **Sepet & Ödeme**: Stripe entegrasyonu, sipariş takibi
+- ✅ **Responsive Tasarım**: Mobil uyumlu, optimize edilmiş
+- ✅ **SEO**: Meta tags, Schema.org, sitemap
+- ✅ **Admin Panel**: Sipariş yönetimi, stok takibi, yorum onaylama
+
+## 📦 Kurulum
+
+### Yerel Geliştirme (Windows PowerShell)
 
 ```powershell
-# proje dizinine gidin
-Set-Location .\projects\kayabasi-naturel
+# Proje dizinine git
+cd projects\kayabasi-naturel
 
-# sanal ortam oluştur ve aktive et
+# Sanal ortam oluştur
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
-# bağımlılıkları yükle
+# Bağımlılıkları yükle
 pip install -r requirements.txt
 
-# ilk migrate ve süper kullanıcı
+# Veritabanı migrasyonları
 python manage.py migrate
+
+# Süper kullanıcı oluştur
 python manage.py createsuperuser
 
-# sunucuyu başlat
+# Sunucuyu başlat
 python manage.py runserver
 ```
 
- Notlar:
- - `settings.py` içinde `SECRET_KEY` üretip değiştirin (üretim için).
- - Ödeme entegrasyonu (örnek Stripe) iskeleti bu scaffold'a eklendi. Geliştirmek için:
- 
- - Ortam değişkenleri ayarlayın: `STRIPE_SECRET_KEY` ve `STRIPE_PUBLISHABLE_KEY`.
+Site: `http://localhost:8000/`  
+Admin: `http://localhost:8000/admin/`
+
+## 🔧 Yapılandırma
+
+### Geliştirme Ortamı
+
+`.env` dosyası oluştur (isteğe bağlı):
+
+```env
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Stripe (ödeme)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+
+# Email (isteğe bağlı)
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+```
+
+### Production Deployment
+
+```bash
+# Production settings kullan
+export DJANGO_SETTINGS_MODULE=config.settings_prod
+
+# Gerekli environment variables
+export SECRET_KEY='...'
+export ALLOWED_HOSTS='yourdomain.com,www.yourdomain.com'
+export DATABASE_URL='postgres://user:pass@host:5432/dbname'
+
+# Static dosyaları topla
+python manage.py collectstatic --noinput
+
+# Gunicorn ile çalıştır
+gunicorn config.wsgi:application
+```
+
+## 📁 Proje Yapısı
+
+```
+kayabasi-naturel/
+├── config/              # Django ayarları
+│   ├── settings.py      # Geliştirme ayarları
+│   ├── settings_prod.py # Production ayarları
+│   └── urls.py
+├── store/               # Ana uygulama
+│   ├── models.py        # Ürün, Sipariş, Yorum modelleri
+│   ├── views.py         # View fonksiyonları
+│   ├── admin.py         # Admin panel özelleştirmeleri
+│   └── management/      # Yönetim komutları
+├── templates/           # HTML şablonları
+├── static/              # CSS, JS, görseller
+├── media/               # Kullanıcı yüklemeleri
+└── requirements.txt     # Python bağımlılıkları
+```
+
+## 🎨 Özelleştirme
+
+### Yeni Kategori Ekleme
+
+1. `store/views.py` → `category_products` fonksiyonuna ekle
+2. `templates/store/category.html` → Banner görseli ekle
+3. Admin'den ürünleri kategoriye ata
+
+### Ödeme Ayarları
+
+Stripe dashboard'dan API anahtarlarını al ve ayarla:
+
+```python
+# settings.py
+STRIPE_SECRET_KEY = 'sk_live_...'
+STRIPE_PUBLISHABLE_KEY = 'pk_live_...'
+```
+
+## 📊 Yönetim Komutları
+
+```bash
+# Paket ayarlarını güncelle
+python manage.py setup_packages
+
+# Minimum sipariş miktarlarını ayarla
+python manage.py set_minimums
+
+# Veritabanını yedekle
+python manage.py dumpdata > backup.json
+```
+
+## 🔒 Güvenlik
+
+Production için:
+- `DEBUG = False` ayarla
+- `SECRET_KEY` değiştir
+- HTTPS kullan
+- `settings_prod.py` kullan
+- Firewall kuralları ayarla
+
+## 📝 Lisans
+
+Bu proje özel kullanım içindir.
+
+## 👥 İletişim
+
+İlyas Kayabaşı - Kayabaşı Naturel
  - Gerçek ödeme akışı için Stripe Webhook doğrulaması ekleyin ve `Order.paid` alanını webhook ile güncelleyin.
  - Ortam değişkenleri ayarlayın: `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY` ve `STRIPE_WEBHOOK_SECRET`.
  - Para birimi: proje TL (TRY) ile çalışacak şekilde ayarlandı.

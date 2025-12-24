@@ -1,53 +1,78 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="hero bg-light rounded p-4 mb-5">
-    <div class="text-center">
-      <h1 class="display-4 mb-3">Kayabaşı Naturel</h1>
-      <p class="lead text-muted mb-0">Zeytin, zeytinyağı ve arı ürünlerinde doğal ve güvenilir lezzetler.</p>
+  <section class="hero-premium mb-5">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <span class="pill">Doğal · Güvenilir · Yerel</span>
+        <h1 class="display-5 fw-bold mt-3 mb-3">Kayabaşı Naturel</h1>
+        <p class="lead text-muted mb-4">Zeytin, zeytinyağı ve arı ürünlerinde butik üretim, şeffaf tedarik ve taze hasat lezzetleri.</p>
+        <div class="d-flex flex-wrap gap-3">
+          <a class="btn btn-success btn-lg" href="{% url 'store:category_products' 'zeytin' %}">Zeytin Ürünleri</a>
+          <a class="btn btn-outline-light btn-lg" href="{% url 'store:category_products' 'ari' %}">Arı Ürünleri</a>
+        </div>
+        <div class="mt-4 d-flex flex-wrap gap-3 text-white-50 small">
+          <div class="badge-soft">Soğuk sıkım</div>
+          <div class="badge-soft">Katkısız</div>
+          <div class="badge-soft">Yöresel üretim</div>
+        </div>
+      </div>
+      <div class="col-lg-5 text-center">
+        <div class="hero-visual">
+          <div class="blob blob-1"></div>
+          <div class="blob blob-2"></div>
+          <div class="hero-icon">🫒</div>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <h2 class="text-center mb-5">Ürün Kategorileri</h2>
+  <h2 class="text-center mb-4">Ürün Kategorileri</h2>
+  <p class="text-center text-muted mb-5">Doğal arı ürünleri ve seçili zeytin/zeytinyağı koleksiyonlarımızı keşfedin.</p>
   
   <div class="row g-4 justify-content-center">
     <!-- Arı Ürünleri Kartı -->
-    <div class="col-md-5">
+    <div class="col-md-6 col-lg-5">
       <a href="{% url 'store:category_products' 'ari' %}" class="text-decoration-none">
-        <div class="card shadow-lg border-0 h-100 category-card" style="transition: transform 0.3s;">
-          <div class="card-body text-center p-5">
-            <div class="display-1 mb-4">🐝</div>
-            <h3 class="card-title mb-3">Arı Ürünleri</h3>
-            <p class="card-text text-muted">Bal, petek, polen, propolis ve daha fazlası...</p>
-            <div class="mt-4">
-              <span class="btn btn-warning">Ürünleri İncele</span>
-            </div>
+        <div class="premium-card h-100">
+          <div class="card-top">
+            <span class="chip chip-amber">Arı Koleksiyonu</span>
+            <span class="emoji">🐝</span>
+          </div>
+          <h3 class="mb-2">Arı Ürünleri</h3>
+          <p class="text-muted mb-3">Bal, petek, polen, propolis ve daha fazlası.</p>
+          <div class="meta-row">
+            <span class="meta">Taze hasat</span>
+            <span class="meta">Analiz raporlu</span>
+          </div>
+          <div class="mt-4 d-flex justify-content-between align-items-center">
+            <span class="pill-light">Butik üretim</span>
+            <span class="btn btn-outline-amber">Ürünleri İncele</span>
           </div>
         </div>
       </a>
     </div>
 
     <!-- Zeytin Ürünleri Kartı -->
-    <div class="col-md-5">
+    <div class="col-md-6 col-lg-5">
       <a href="{% url 'store:category_products' 'zeytin' %}" class="text-decoration-none">
-        <div class="card shadow-lg border-0 h-100 category-card" style="transition: transform 0.3s;">
-          <div class="card-body text-center p-5">
-            <div class="display-1 mb-4">🫒</div>
-            <h3 class="card-title mb-3">Zeytin Ürünleri</h3>
-            <p class="card-text text-muted">Sızma zeytinyağı, salamura zeytin ve daha fazlası...</p>
-            <div class="mt-4">
-              <span class="btn btn-success">Ürünleri İncele</span>
-            </div>
+        <div class="premium-card h-100">
+          <div class="card-top">
+            <span class="chip chip-green">Zeytin & Zeytinyağı</span>
+            <span class="emoji">🫒</span>
+          </div>
+          <h3 class="mb-2">Zeytin Ürünleri</h3>
+          <p class="text-muted mb-3">Sızma zeytinyağı, salamura zeytin ve seçili ürünler.</p>
+          <div class="meta-row">
+            <span class="meta">Soğuk sıkım</span>
+            <span class="meta">Erken hasat</span>
+          </div>
+          <div class="mt-4 d-flex justify-content-between align-items-center">
+            <span class="pill-light">Taş baskı</span>
+            <span class="btn btn-outline-success">Ürünleri İncele</span>
           </div>
         </div>
       </a>
     </div>
   </div>
-
-  <style>
-    .category-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
-    }
-  </style>
 {% endblock %}

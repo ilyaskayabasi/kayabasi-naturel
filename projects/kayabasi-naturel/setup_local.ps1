@@ -30,7 +30,7 @@ if ($CreateSuperUser) {
     if ($admin_user -and $admin_pass) {
         Write-Host "Creating superuser $admin_user"
         python manage.py createsuperuser --noinput --username $admin_user --email $admin_email
-        # set password by writing a temporary python script and running it (avoids quoting issues)
+uybi         # set password by writing a temporary python script and running it (avoids quoting issues)
         $tmp = [System.IO.Path]::Combine($PWD.Path, '._set_su_tmp.py')
         $py = @"
     from django.contrib.auth import get_user_model

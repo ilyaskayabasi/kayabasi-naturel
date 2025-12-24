@@ -1,11 +1,16 @@
 {% extends 'base.html' %}
 {% block extra_head %}
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <meta name="description" content="{{ product.description|default:'Doğal ürün'|truncatechars:200 }}">
     <meta property="og:title" content="{{ product.name }}">
     <meta property="og:description" content="{{ product.description|default:'Doğal ürün'|truncatechars:200 }}">
+    <meta property="og:type" content="product">
     {% if product.image %}
         <meta property="og:image" content="{{ product.image.url }}">
     {% endif %}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ product.name }}">
+    <meta name="twitter:description" content="{{ product.description|default:'Doğal ürün'|truncatechars:200 }}">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -17,6 +22,10 @@
         {% endif %}
         "sku": "{{ product.slug|escapejs }}",
         "url": "{{ request.build_absolute_uri }}",
+        "brand": {
+            "@type": "Organization",
+            "name": "Kayabaşı Naturel"
+        },
         "offers": {
             "@type": "Offer",
             "priceCurrency": "TRY",
@@ -30,6 +39,21 @@
             "reviewCount": "{{ review_count }}"
         }
         {% endif %}
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": "{{ request.build_absolute_uri|cut:request.get_full_path }}"},
+            {% if product.category %}
+            {"@type": "ListItem", "position": 2, "name": "{{ product.category.name }}", "item": "{{ request.build_absolute_uri|cut:request.get_full_path }}category/{{ product.category.slug }}/"},
+            {"@type": "ListItem", "position": 3, "name": "{{ product.name }}", "item": "{{ request.build_absolute_uri }}"}
+            {% else %}
+            {"@type": "ListItem", "position": 2, "name": "{{ product.name }}", "item": "{{ request.build_absolute_uri }}"}
+            {% endif %}
+        ]
     }
     </script>
 {% endblock %}
@@ -53,9 +77,13 @@
         <!-- Ürün Galerisi -->
         <div class="col-lg-6">
             <!-- Ana Resim -->
-            <div class="card shadow-sm border-0 mb-3">
-                <img id="mainImage" src="{% if product.image %}{{ product.image.url }}{% else %}https://placehold.co/600x600?text=Ürün+Görseli{% endif %}" 
-                     class="card-img-top" alt="{{ product.name }}" loading="eager" style="border-radius: 8px; object-fit: cover; height: 500px;">
+            <div style="width: 100%; max-height: 520px; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 8px; background: #f5f5f5;">
+                <img id="mainImage"
+                     src="{% if product.image %}{{ product.image.url }}?v={{ product.id }}{% else %}/media/products/polen.jpg?v={{ product.id }}{% endif %}"
+                     loading="eager" decoding="sync" fetchpriority="high"
+                     alt="{{ product.name }}"
+                     onerror="this.onerror=null; this.src='/media/products/polen.jpg?v={{ product.id }}'"
+                     style="width: 100%; height: 100%; object-fit: cover; display: block;">
             </div>
 
             <!-- Küçük Resimler (Galeri) -->
@@ -63,19 +91,19 @@
                 <div class="row g-2">
                     <!-- Ana ürün resmi thumbnail -->
                     <div class="col-3">
-                        <img src="{% if product.image %}{{ product.image.url }}{% else %}https://placehold.co/100x100{% endif %}" 
-                             alt="{{ product.name }}" class="img-thumbnail cursor-pointer" 
+                        <img src="{% if product.image %}{{ product.image.url }}?v={{ product.id }}{% else %}/media/products/polen.jpg?v={{ product.id }}{% endif %}"
+                             alt="{{ product.name }}" class="img-thumbnail cursor-pointer"
                              onclick="document.getElementById('mainImage').src=this.src;"
-                             loading="lazy"
+                             loading="eager" decoding="async"
                              style="cursor: pointer; border: 2px solid #28a745;">
                     </div>
                     <!-- Ek resimler -->
                     {% for img in product.images.all %}
                         <div class="col-3">
-                            <img src="{{ img.image.url }}" alt="{{ img.alt_text }}" 
-                                 class="img-thumbnail cursor-pointer" 
+                            <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}"
+                                 class="img-thumbnail cursor-pointer"
                                  onclick="document.getElementById('mainImage').src=this.src;"
-                                 loading="lazy"
+                                 loading="lazy" decoding="async"
                                  style="cursor: pointer;">
                         </div>
                     {% endfor %}
@@ -294,7 +322,7 @@
 <script>
     // Paket verisi
     const packages = {{ product.packages|safe }};
-    const basePrice = {{ product.price }};
+    const basePrice = parseFloat('{{ product.price }}');
 
     function updatePackagePrice(size) {
         const pkg = packages.find(p => p.size === size);

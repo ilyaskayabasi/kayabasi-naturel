@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Product, Category, Order, OrderItem, ProductImage, Review
+from .models import Product, Category, Order, OrderItem, ProductImage, Review, StockNotification
 
 
 @admin.register(Category)
@@ -261,3 +261,10 @@ class ProductAdmin(admin.ModelAdmin):
         )
     review_count.short_description = 'Yorum Sayı'
 
+
+@admin.register(StockNotification)
+class StockNotificationAdmin(admin.ModelAdmin):
+    list_display = ('email', 'product', 'notified', 'created_at')
+    list_filter = ('notified', 'created_at')
+    search_fields = ('email', 'product__name')
+    readonly_fields = ('created_at',)

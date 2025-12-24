@@ -160,3 +160,17 @@ class Review(models.Model):
     def get_rating_display_star(self):
         return '⭐' * self.rating
 
+
+class StockNotification(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='stock_notifications')
+    email = models.EmailField()
+    notified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Stok Bildirimi"
+        verbose_name_plural = "Stok Bildirimleri"
+        unique_together = ('product', 'email')
+
+    def __str__(self):
+        return f"{self.email} - {self.product.name}"

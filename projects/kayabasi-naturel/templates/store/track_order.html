@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sipariş Takip - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">
+                        <i class="bi bi-box-seam text-primary"></i> Sipariş Takip
+                    </h2>
+                    
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="order_id" class="form-label">Sipariş Numarası</label>
+                            <input type="text" class="form-control" id="order_id" name="order_id" 
+                                   placeholder="Örn: 12345" required>
+                            <small class="text-muted">Sipariş onay mailinizde bulabilirsiniz</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-posta Adresi</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="ornek@email.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Siparişi Sorgula
+                        </button>
+                    </form>
+
+                    {% if order %}
+                    <div class="order-details mt-4">
+                        <hr>
+                        <h4 class="mb-3">Sipariş Detayları</h4>
+                        
+                        <div class="mb-3">
+                            <strong>Sipariş No:</strong> #{{ order.id }}<br>
+                            <strong>Tarih:</strong> {{ order.created_at|date:"d M Y H:i" }}<br>
+                            <strong>Durum:</strong> 
+                            {% if order.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-clock"></i> Beklemede
+                                </span>
+                            {% elif order.status == 'processing' %}
+                                <span class="badge bg-info">
+                                    <i class="bi bi-gear"></i> Hazırlanıyor
+                                </span>
+                            {% elif order.status == 'shipped' %}
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-truck"></i> Kargoya Verildi
+                                </span>
+                            {% elif order.status == 'delivered' %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Teslim Edildi
+                                </span>
+                            {% elif order.status == 'cancelled' %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-x-circle"></i> İptal Edildi
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <strong>Teslimat Adresi:</strong><br>
+                            {{ order.address }}<br>
+                            {% if order.district %}{{ order.district }}, {% endif %}
+                            {% if order.city %}{{ order.city }}{% endif %}
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Ürün</th>
+                                        <th>Adet</th>
+                                        <th class="text-end">Fiyat</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in order.items.all %}
+                                    <tr>
+                                        <td>{{ item.product.name }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td class="text-end">{{ item.price }} ₺</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="fw-bold">
+                                        <td colspan="2">Toplam</td>
+                                        <td class="text-end">{{ order.total }} ₺</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        {% if order.order_notes %}
+                        <div class="alert alert-info">
+                            <strong>Sipariş Notu:</strong> {{ order.order_notes }}
+                        </div>
+                        {% endif %}
+
+                        <div class="mt-4 text-center">
+                            <a href="{% url 'store:index' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-house"></i> Ana Sayfaya Dön
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.order-details {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+}
+</style>
+{% endblock %}

@@ -100,47 +100,128 @@
 
   <!-- Ürün Listesi -->
   <div id="products" class="mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h3 class="mb-0">Tüm Ürünler</h3>
-      <div class="btn-group btn-group-sm" role="group">
-        <button type="button" class="btn btn-outline-secondary active">Varsayılan</button>
-        <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='?sort=price'">Fiyat</button>
-        <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='?sort=name'">İsim</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="row g-4">
-    {% for p in products %}
-      <div class="col-sm-6 col-md-4 col-lg-3">
-        <div class="card h-100 shadow-sm product-card">
-          {% if p.image %}
-            <img src="{{ p.image.url }}" class="card-img-top product-img" alt="{{ p.name }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=Resim+Yok';">
-          {% else %}
-            <img src="https://placehold.co/600x400?text=Resim+Yok" class="card-img-top product-img" alt="{{ p.name }}" loading="lazy" decoding="async">
-          {% endif %}
-          <div class="card-body d-flex flex-column">
-            <div class="mb-2">
-              {% if p.category %}<span class="badge bg-success">{{ p.category.name }}</span>{% endif %}
-            </div>
-            <h5 class="card-title">{{ p.name }}</h5>
-            <p class="card-text text-muted small">{{ p.description|truncatechars:120 }}</p>
-            <div class="mt-auto">
-              <div class="mb-2"><strong class="text-success fs-5">{{ p.price }} TL</strong></div>
-              <div class="d-grid gap-2">
-                <a class="btn btn-outline-primary btn-sm" href="{% url 'store:product_detail' p.slug %}">Detayları Gör</a>
-                <a class="btn btn-success btn-sm" href="{% url 'store:add_to_cart' p.slug %}">Sepete Ekle</a>
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title mb-3">
+              <i class="bi bi-funnel"></i> Filtreler
+            </h5>
+            <form method="get" id="filterForm">
+              <!-- Fiyat Aralığı -->
+              <div class="mb-3">
+                <label class="form-label fw-bold">Fiyat Aralığı</label>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <input type="number" class="form-control form-control-sm" 
+                           name="min_price" placeholder="Min" 
+                           value="{{ filters.min_price }}" min="0" step="0.01">
+                  </div>
+                  <div class="col-6">
+                    <input type="number" class="form-control form-control-sm" 
+                           name="max_price" placeholder="Max" 
+                           value="{{ filters.max_price }}" min="0" step="0.01">
+                  </div>
+                </div>
               </div>
-            </div>
+
+              <!-- Stok Durumu -->
+              <div class="mb-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" 
+                         name="in_stock" value="1" id="inStockCheck"
+                         {% if filters.in_stock %}checked{% endif %}>
+                  <label class="form-check-label" for="inStockCheck">
+                    Sadece Stokta Olanlar
+                  </label>
+                </div>
+              </div>
+
+              <!-- Sıralama (hidden input) -->
+              <input type="hidden" name="sort" value="{{ current_sort }}">
+
+              <!-- Butonlar -->
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">
+                  <i class="bi bi-search"></i> Filtrele
+                </button>
+                <a href="{% url 'store:category_products' category_type=request.resolver_match.kwargs.category_type %}" 
+                   class="btn btn-outline-secondary btn-sm">
+                  <i class="bi bi-x-circle"></i> Temizle
+                </a>
+              </div>
+            </form>
           </div>
         </div>
       </div>
-    {% empty %}
-      <div class="col-12">
-        <div class="alert alert-info text-center">
-          <i class="fas fa-info-circle"></i> Bu kategoride henüz ürün bulunmuyor.
+
+      <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="mb-0">Tüm Ürünler ({{ products.count }})</h3>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-secondary {% if current_sort == 'default' %}active{% endif %}"
+                    onclick="updateSort('default')">Varsayılan</button>
+            <button type="button" class="btn btn-outline-secondary {% if current_sort == 'price' %}active{% endif %}"
+                    onclick="updateSort('price')">Ucuzdan Pahalıya</button>
+            <button type="button" class="btn btn-outline-secondary {% if current_sort == 'price-desc' %}active{% endif %}"
+                    onclick="updateSort('price-desc')">Pahalıdan Ucuza</button>
+            <button type="button" class="btn btn-outline-secondary {% if current_sort == 'name' %}active{% endif %}"
+                    onclick="updateSort('name')">İsim</button>
+          </div>
+        </div>
+
+<script>
+function updateSort(sortValue) {
+  const form = document.getElementById('filterForm');
+  const sortInput = form.querySelector('input[name="sort"]');
+  sortInput.value = sortValue;
+  form.submit();
+}
+</script>
+
+        <div class="row g-4">
+          {% for p in products %}
+            <div class="col-sm-6 col-md-4 col-lg-4">
+              <div class="card h-100 shadow-sm product-card">
+                {% if p.image %}
+                  <img src="{{ p.image.url }}" class="card-img-top product-img" alt="{{ p.name }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=Resim+Yok';">
+                {% else %}
+                  <img src="https://placehold.co/600x400?text=Resim+Yok" class="card-img-top product-img" alt="{{ p.name }}" loading="lazy" decoding="async">
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                  <div class="mb-2">
+                    {% if p.category %}<span class="badge bg-success">{{ p.category.name }}</span>{% endif %}
+                    {% if p.stock <= 0 %}
+                      <span class="badge bg-danger">Stokta Yok</span>
+                    {% elif p.stock <= 5 %}
+                      <span class="badge bg-warning text-dark">Son {{ p.stock }} Adet</span>
+                    {% endif %}
+                  </div>
+                  <h5 class="card-title">{{ p.name }}</h5>
+                  <p class="card-text text-muted small">{{ p.description|truncatechars:120 }}</p>
+                  <div class="mt-auto">
+                    <div class="mb-2"><strong class="text-success fs-5">{{ p.price }} ₺</strong></div>
+                    <div class="d-grid gap-2">
+                      <a class="btn btn-outline-primary btn-sm" href="{% url 'store:product_detail' p.slug %}">Detayları Gör</a>
+                      {% if p.stock > 0 %}
+                        <a class="btn btn-success btn-sm" href="{% url 'store:add_to_cart' p.slug %}">Sepete Ekle</a>
+                      {% else %}
+                        <button class="btn btn-secondary btn-sm" disabled>Stokta Yok</button>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="col-12">
+              <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> Filtrelere uygun ürün bulunamadı.
+              </div>
+            </div>
+          {% endfor %}
         </div>
       </div>
-    {% endfor %}
+    </div>
   </div>
 {% endblock %}

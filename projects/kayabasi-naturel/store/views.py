@@ -16,7 +16,7 @@ except Exception:
     class SignatureVerificationError(Exception):
         pass
 
-from .models import Product, Category, Order, OrderItem, Review
+from .models import Product, Category, Order, OrderItem, Review, StockNotification
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -27,6 +27,39 @@ def index(request):
 
 def healthz(request):
     return JsonResponse({'status': 'ok', 'time': str(models.functions.Now())})
+
+
+def stock_notify(request, slug):
+    """Stok bildirimi kaydı"""
+    if request.method == 'POST':
+        product = get_object_or_404(Product, slug=slug)
+        email = request.POST.get('email')
+        
+        if email:
+            StockNotification.objects.get_or_create(
+                product=product,
+                email=email
+            )
+            messages.success(request, f'✓ Bildirim kaydedildi! {product.name} stoğa girdiğinde {email} adresine haber vereceğiz.')
+        else:
+            messages.error(request, 'Geçerli bir email adresi giriniz.')
+    
+    return redirect('store:product_detail', slug=slug)
+
+
+def track_order(request):
+    """Sipariş takip sayfası"""
+    order = None
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        email = request.POST.get('email')
+        
+        try:
+            order = Order.objects.get(id=order_id, email=email)
+        except Order.DoesNotExist:
+            messages.error(request, 'Sipariş bulunamadı. Lütfen bilgilerinizi kontrol edin.')
+    
+    return render(request, 'store/track_order.html', {'order': order})
 
 
 def category_products(request, category_type):
@@ -44,6 +77,18 @@ def category_products(request, category_type):
         category_name = 'Ürünler'
         category_icon = '📦'
     
+    # Filtreleme
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    in_stock = request.GET.get('in_stock')
+    
+    if min_price:
+        products = products.filter(price__gte=min_price)
+    if max_price:
+        products = products.filter(price__lte=max_price)
+    if in_stock == '1':
+        products = products.filter(stock__gt=0)
+    
     # Sıralama
     sort_by = request.GET.get('sort', 'default')
     if sort_by == 'price':
@@ -60,6 +105,11 @@ def category_products(request, category_type):
         'category_name': category_name,
         'category_icon': category_icon,
         'current_sort': sort_by,
+        'filters': {
+            'min_price': min_price or '',
+            'max_price': max_price or '',
+            'in_stock': in_stock == '1',
+        }
     }
     return render(request, 'store/category.html', context)
 

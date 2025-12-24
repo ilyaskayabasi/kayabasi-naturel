@@ -116,6 +116,20 @@
             <!-- Başlık -->
             <h1 class="mb-3">{{ product.name }}</h1>
             
+            <!-- Sosyal Medya Paylaşım -->
+            <div class="mb-3">
+                <span class="text-muted small me-2">Paylaş:</span>
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="btn btn-sm btn-outline-primary me-1" rel="noopener" aria-label="Facebook'ta paylaş">
+                    <i class="bi bi-facebook"></i>
+                </a>
+                <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ product.name }}" target="_blank" class="btn btn-sm btn-outline-info me-1" rel="noopener" aria-label="Twitter'da paylaş">
+                    <i class="bi bi-twitter"></i>
+                </a>
+                <a href="https://wa.me/?text={{ product.name }}%20-%20{{ request.build_absolute_uri }}" target="_blank" class="btn btn-sm btn-outline-success" rel="noopener" aria-label="WhatsApp'ta paylaş">
+                    <i class="bi bi-whatsapp"></i>
+                </a>
+            </div>
+            
             <!-- Rating -->
             {% if avg_rating %}
                 <div class="mb-3">
@@ -151,8 +165,20 @@
                         <span class="badge bg-success">✓ Stokta Var</span>
                     {% endif %}
                 {% else %}
-                    <div class="alert alert-danger mb-0">
+                    <div class="alert alert-danger mb-3">
                         <strong>Maalesef Stokta Yok</strong>
+                    </div>
+                    <!-- Stok Bildirimi -->
+                    <div class="card border-warning">
+                        <div class="card-body">
+                            <h6 class="card-title">📬 Stokta Olunca Haber Ver</h6>
+                            <p class="card-text small text-muted">Email adresinizi bırakın, ürün stoğa girdiğinde size haber verelim.</p>
+                            <form method="POST" action="{% url 'store:stock_notify' product.slug %}" class="d-flex gap-2">
+                                {% csrf_token %}
+                                <input type="email" name="email" class="form-control form-control-sm" placeholder="E-posta adresiniz" required>
+                                <button type="submit" class="btn btn-sm btn-warning">Bildir</button>
+                            </form>
+                        </div>
                     </div>
                 {% endif %}
             </div>

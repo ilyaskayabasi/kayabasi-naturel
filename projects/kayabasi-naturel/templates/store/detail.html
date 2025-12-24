@@ -77,13 +77,32 @@
         <!-- Ürün Galerisi -->
         <div class="col-lg-6">
             <!-- Ana Resim -->
-            <div style="width: 100%; max-height: 520px; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 8px; background: #f5f5f5;">
+            <div style="width: 100%; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 8px; background: #f5f5f5; min-height: 300px;">
                 <img id="mainImage"
                      src="{% if product.image %}{{ product.image.url }}?v={{ product.id }}{% else %}/media/products/polen.jpg?v={{ product.id }}{% endif %}"
                      loading="eager" decoding="sync" fetchpriority="high"
                      alt="{{ product.name }}"
                      onerror="this.onerror=null; this.src='/media/products/polen.jpg?v={{ product.id }}'"
                      style="width: 100%; height: 100%; object-fit: cover; display: block;">
+            </div>
+                <div class="card shadow-sm border-0 mb-3">
+                    {% if product.images.all %}
+                        {% for img in product.images.all %}
+                            {% if forloop.first %}
+                                <img id="mainImage" src="{{ img.image.url }}" 
+                                     class="card-img-top" alt="{{ product.name }}" loading="eager" style="border-radius: 8px; object-fit: cover; height: 500px;"
+                                     onerror="this.src='https://placehold.co/600x600?text=Ürün+Görseli'">
+                            {% endif %}
+                        {% endfor %}
+                    {% elif product.image %}
+                        <img id="mainImage" src="{{ product.image.url }}" 
+                             class="card-img-top" alt="{{ product.name }}" loading="eager" style="border-radius: 8px; object-fit: cover; height: 500px;"
+                             onerror="this.src='https://placehold.co/600x600?text=Ürün+Görseli'">
+                    {% else %}
+                        <img id="mainImage" src="https://placehold.co/600x600?text=Ürün+Görseli" 
+                             class="card-img-top" alt="{{ product.name }}" loading="eager" style="border-radius: 8px; object-fit: cover; height: 500px;">
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Küçük Resimler (Galeri) -->

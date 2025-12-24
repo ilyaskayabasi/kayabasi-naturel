@@ -40,6 +40,11 @@
   }
   
   /* Mobil responsive */
+  @media (max-width: 992px) {
+    .product-card .card-img-top {
+      min-height: 200px;
+    }
+  }
   @media (max-width: 768px) {
     .category-banner {
       padding: 30px 20px;
@@ -53,6 +58,14 @@
     }
     .category-description {
       font-size: 14px;
+    }
+    .product-card .card-img-top {
+      min-height: 180px;
+    }
+  }
+  @media (max-width: 576px) {
+    .product-card .card-img-top {
+      min-height: 160px;
     }
   }
 </style>

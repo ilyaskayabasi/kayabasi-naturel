@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: kayabasi-naturel
+    env: python
+    plan: free
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+    startCommand: gunicorn config.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*.render.com,kayabasi-naturel.onrender.com"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        value: "sqlite:///db.sqlite3"
+
+databases:
+  - name: kayabasi-naturel-db
+    plan: free
+    ipAllowList: []

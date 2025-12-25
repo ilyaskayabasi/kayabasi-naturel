@@ -94,8 +94,9 @@ STATICFILES_DIRS = [
 ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Serve media files through static path for production (Render)
+MEDIA_URL = '/static/media/'
+MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
